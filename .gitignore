@@ -1,0 +1,8 @@
+node_modules/
+npm-debug.log
+
+## Directory-based project
+.idea/
+
+# MacOs system files
+.DS_Store
