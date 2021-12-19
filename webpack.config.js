@@ -7,7 +7,7 @@ module.exports = function(env) {
         entry : './src/index.js',
         output : {
             path: __dirname + '/public/js',
-            filename : 'video-ads-manager.js',
+            filename : 'ads-manager.js',
             library: 'weavo'
         },
         optimization: {

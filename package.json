@@ -1,5 +1,5 @@
 {
-  "name": "video-ads-manager",
+  "name": "ads-manager",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
@@ -14,19 +14,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/basil79/video-ads-manager"
+    "url": "https://github.com/basil79/ads-manager"
   },
   "keywords": [
     "vast",
     "vpaid",
-    "ad",
+    "vmap",
+    "video-ads",
+    "ads-manager",
+    "vast-client-js",
+    "ima-sdk",
     "advertising",
     "iab",
     "video",
     "instream",
     "outstream"
   ],
-  "author": "",
+  "author": "Basil Goldman",
   "license": "Apache-2.0",
   "dependencies": {
     "vast-client": "^3.2.0"
