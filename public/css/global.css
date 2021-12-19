@@ -1,0 +1,59 @@
+body {
+    -webkit-font-smoothing: antialiased;
+    font-family: Arial;
+    font-size: 16px;
+    line-height: 24px;
+}
+input, button, textarea, select, optgroup, option {
+    font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+}
+button {
+    background-color: #f5f5f5;
+    color: #000;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0 10px;
+    white-space: nowrap;
+    line-height: 30px;
+    margin: 0 0 12px;
+}
+.primary-button {
+    color: #fff;
+    border: 1px solid #304f9d;
+    background: #3f6dc9;
+    background: linear-gradient(to bottom,#3f6dc9 100%,#3054b8 100%);
+    background: -webkit-linear-gradient(top,#3f6dc9 100%,#3054b8 100%);
+    background: -moz-linear-gradient(top,#3f6dc9 100%,#3054b8 100%);
+    background: -o-linear-gradient(top,#3f6dc9 100%,#3054b8 100%);
+    background: -ms-linear-gradient(top,#3f6dc9 100%,#3054b8 100%);
+}
+.primary-button:hover {
+    background: #477bdb;
+    background: linear-gradient(to bottom,#477bdb 100%,#375fcf 100%);
+    background: -webkit-linear-gradient(top,#477bdb 100%,#375fcf 100%);
+    background: -moz-linear-gradient(top,#477bdb 100%,#375fcf 100%);
+    background: -o-linear-gradient(top,#477bdb 100%,#375fcf 100%);
+    background: -ms-linear-gradient(top,#477bdb 100%,#375fcf 100%)
+}
+
+/* internal */
+#vast-url-input {
+    width: 99%;
+    height: 80px;
+    word-break: break-all;
+}
+.ad-button.disabled,.ad-button[disabled],fieldset[disabled] .ad-button {
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .65;
+    pointer-events: none
+}
+.ad-button:hover {
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}

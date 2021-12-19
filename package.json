@@ -1,0 +1,41 @@
+{
+  "name": "video-ads-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "contBuild": "watch \"npm run build:dev\" src",
+    "devServer": "npm-run-all -p testServer contBuild",
+    "start": "npm run devServer",
+    "build:dev": "webpack --mode=development --env dev --env app.conf=\"dev\"",
+    "build:prod": "webpack --mode=production --env prod --env app.conf=\"prod\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "testServer": "http-server --cors -p 8081 --silent"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/basil79/video-ads-manager"
+  },
+  "keywords": [
+    "vast",
+    "vpaid",
+    "ad",
+    "advertising",
+    "iab",
+    "video",
+    "instream",
+    "outstream"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "vast-client": "^3.2.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.0.0",
+    "npm-run-all": "^4.1.5",
+    "watch": "^0.13.0",
+    "webpack": "^5.64.2",
+    "webpack-cli": "^4.9.1"
+  }
+}
