@@ -4,5 +4,8 @@ npm-debug.log
 ## Directory-based project
 .idea/
 
+# VS Code
+.vscode/
+
 # MacOs system files
 .DS_Store
