@@ -2,7 +2,9 @@ import { VASTClient, VASTTracker } from "vast-client";
 
 var AdsManager = function(adContainer) {
 
-  console.log('HERE', adContainer);
+  if(!(adContainer instanceof Element || adContainer instanceof HTMLDocument)) {
+    throw new Error('ad container is not defined');
+  }
 
   // Ad Container
   this._adContainer = adContainer;
