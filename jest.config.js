@@ -1,4 +1,3 @@
-
 module.exports = {
   clearMocks: true,
 }
