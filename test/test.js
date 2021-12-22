@@ -1,20 +1,13 @@
 
-
 import { AdsManager } from '../src';
 
-
-//var adContainer = document.createElement('div');
-//var adsManager = new AdsManager(adContainer);
-
 describe('AdsManager', function() {
-  describe('when no ad container', () => {
+  describe('#constructor', () => {
 
-    it('should throw', () => {
-      /*
-      expect(() => {
-        var adsManager = new AdsManager();
-      }).toThrow(Error);
-       */
+    it('check interfaces', () => {
+      var adContainer = document.createElement('div');
+      var adsManager = new AdsManager(adContainer);
+
     })
 
   })
