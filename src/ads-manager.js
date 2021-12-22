@@ -1,10 +1,12 @@
-import { VASTClient, VASTTracker } from "vast-client";
+import { VASTClient, VASTTracker } from 'vast-client';
 
 var AdsManager = function(adContainer) {
 
   if(!(adContainer instanceof Element || adContainer instanceof HTMLDocument)) {
     throw new Error('ad container is not defined');
   }
+
+  this._version = '1.0.0';
 
   // Ad Container
   this._adContainer = adContainer;
@@ -80,6 +82,9 @@ var AdsManager = function(adContainer) {
   this._nextQuartileIndex = 0;
   this._hasImpression = false;
   this._hasStarted = false;
+}
+AdsManager.prototype.getVersion = function() {
+  return this._version;
 }
 AdsManager.prototype.createSlot = function() {
   this._slot = document.createElement('div');
@@ -599,7 +604,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   iframe.style.display = "none";
   iframe.setAttribute('allowfullscreen', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.setAttribute('allow', "autoplay;attribution-reporting;");
+  iframe.setAttribute('allow', "autoplay;");
   iframe.tabIndex = -1;
   iframe.contentWindow.document.open();
   // CORS?
