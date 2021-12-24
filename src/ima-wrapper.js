@@ -1,8 +1,8 @@
-var ImaWrapper = function() {
-  this._attrs = {
+// TODO:
+const ImaWrapper = function() {
+  this._attributes = {
 
   }
-  console.log("");
 }
 
 export { ImaWrapper }

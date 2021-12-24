@@ -188,7 +188,7 @@
         adsManager.resize(width, height, viewMode);
     });
 
-// Request ads
+    // Request ads
     console.log('ad request');
     adsManager.requestAds(vastUrl, {
         resolveAll : false

@@ -9,3 +9,7 @@ npm-debug.log
 
 # MacOs system files
 .DS_Store
+
+# Dist folders
+dist/
+dist_old/
