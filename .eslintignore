@@ -1,0 +1,9 @@
+dist/
+public/
+.babelrc
+!.eslintrc.js
+node_modules/
+test/
+spec/
+jest.config.js
+webpack.config.js
