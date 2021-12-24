@@ -5,14 +5,14 @@ module.exports = {
         node: true
     },
     extends: 'eslint:recommended',
-    parser: 'babel-eslint',
     parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module'
     },
     plugins: ['import'],
     rules: {
-        quotes: ['warn', 'single'],
+        quotes: ['error', 'single'],
+      semi: 'off',
         eqeqeq: 'off',
         'no-console': 'error'
     }
