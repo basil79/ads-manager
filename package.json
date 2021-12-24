@@ -9,6 +9,7 @@
     "start": "npm run devServer",
     "build:dev": "webpack --mode=development --env dev --env app.conf=\"dev\"",
     "build:prod": "webpack --mode=production --env prod --env app.conf=\"prod\"",
+    "prebuild": "rm -rf dist_old && mkdir dist_old && cp -a dist/. dist_old/",
     "test": "mocha --require @babel/register --require global-jsdom/register && jest",
     "jest": "jest",
     "testServer": "http-server --cors -p 8081 --silent",

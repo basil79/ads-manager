@@ -1,12 +1,10 @@
 import { VASTClient, VASTTracker } from 'vast-client';
 
-var AdsManager = function(adContainer) {
+const AdsManager = function(adContainer) {
 
   if(!(adContainer instanceof Element || adContainer instanceof HTMLDocument)) {
     throw new Error('ad container is not defined');
   }
-
-  this._version = '1.0.0';
 
   // Ad Container
   this._adContainer = adContainer;
@@ -15,41 +13,40 @@ var AdsManager = function(adContainer) {
   this._slot = null;
   // Video Slot
   this._videoSlot = null;
-  // Create Video Slot
-  //this.createVideoSlot();
 
   // Create Slot
   this.createSlot();
 
+  // Events
   this.EVENTS = {
-    AdsManagerLoaded: "AdsManagerLoaded", // After success ad request, when vast xml is parsed and ready
-    AdStarted: "AdStarted", //
-    AdStopped: "AdStopped", //
-    AdSkipped: "AdSkipped", //
-    AdLoaded: "AdLoaded", //
-    AdLinearChange: "AdLinearChange",
-    AdSizeChange: "AdSizeChange",
-    AdExpandedChange: "AdExpandedChange",
-    AdSkippableStateChange: "AdSkippableStateChange",
-    AdDurationChange: "AdDurationChange",
-    AdRemainingTimeChange: "AdRemainingTimeChange",
-    AdVolumeChange: "AdVolumeChange",
-    AdImpression: "AdImpression", //
-    AdClickThru: "AdClickThru",
-    AdInteraction: "AdInteraction",
-    AdVideoStart: "AdVideoStart", //
-    AdVideoFirstQuartile: "AdVideoFirstQuartile", //
-    AdVideoMidpoint: "AdVideoMidpoint", //
-    AdVideoThirdQuartile: "AdVideoThirdQuartile", //
-    AdVideoComplete: "AdVideoComplete", //
-    AdUserAcceptInvitation: "AdUserAcceptInvitation",
-    AdUserMinimize: "AdUserMinimize",
-    AdUserClose: "AdUserClose",
-    AdPaused: "AdPaused",
-    AdPlaying: "AdPlaying",
-    AdError: "AdError",
-    AdLog: "AdLog",
-    AllAdsCompleted: "AllAdsCompleted" // After all ads completed, vast, vpaid, vmap
+    AdsManagerLoaded: 'AdsManagerLoaded', // After success ad request, when vast xml is parsed and ready
+    AdStarted: 'AdStarted',
+    AdStopped: 'AdStopped',
+    AdSkipped: 'AdSkipped',
+    AdLoaded: 'AdLoaded',
+    AdLinearChange: 'AdLinearChange',
+    AdSizeChange: 'AdSizeChange',
+    AdExpandedChange: 'AdExpandedChange',
+    AdSkippableStateChange: 'AdSkippableStateChange',
+    AdDurationChange: 'AdDurationChange',
+    AdRemainingTimeChange: 'AdRemainingTimeChange',
+    AdVolumeChange: 'AdVolumeChange',
+    AdImpression: 'AdImpression',
+    AdClickThru: 'AdClickThru',
+    AdInteraction: 'AdInteraction',
+    AdVideoStart: 'AdVideoStart',
+    AdVideoFirstQuartile: 'AdVideoFirstQuartile',
+    AdVideoMidpoint: 'AdVideoMidpoint',
+    AdVideoThirdQuartile: 'AdVideoThirdQuartile',
+    AdVideoComplete: 'AdVideoComplete',
+    AdUserAcceptInvitation: 'AdUserAcceptInvitation',
+    AdUserMinimize: 'AdUserMinimize',
+    AdUserClose: 'AdUserClose',
+    AdPaused: 'AdPaused',
+    AdPlaying: 'AdPlaying',
+    AdError: 'AdError',
+    AdLog: 'AdLog',
+    AllAdsCompleted: 'AllAdsCompleted' // After all ads completed, vast, vpaid, vmap
   };
   this._eventCallbacks = {};
   this._creativeEventCallbacks = {};
@@ -82,9 +79,6 @@ var AdsManager = function(adContainer) {
   this._nextQuartileIndex = 0;
   this._hasImpression = false;
   this._hasStarted = false;
-}
-AdsManager.prototype.getVersion = function() {
-  return this._version;
 }
 AdsManager.prototype.createSlot = function() {
   this._slot = document.createElement('div');
@@ -132,16 +126,16 @@ AdsManager.prototype.removeVideoSlot = function() {
  */
 AdsManager.prototype.updateVPAIDProgress = function() {
   // Check remaining time
-  this._attributes.remainingTime = this._isCreativeFunctionInvokable("getAdRemainingTime") ? this._vpaidCreative.getAdRemainingTime() : -1;
+  this._attributes.remainingTime = this._isCreativeFunctionInvokable('getAdRemainingTime') ? this._vpaidCreative.getAdRemainingTime() : -1;
   console.log('getAdRemainingTime', this._attributes.remainingTime);
-  if(!isNaN(this._attributes.remainingTime) && this._attributes.remainingTime != 1) {
+  if(!isNaN(this._attributes.remainingTime) && this._attributes.remainingTime !== 1) {
     this._attributes.currentTime = this._attributes.duration - this._attributes.remainingTime;
     // Track progress
     this._vastTracker.setProgress(this._attributes.currentTime);
   }
 }
 AdsManager.prototype.startVPAIDProgress = function() {
-  var that = this;
+  const that = this;
   console.log('start vpaid progress');
   if(this._vpaidProgressCounter) {
     clearInterval(this._vpaidProgressCounter);
@@ -190,9 +184,9 @@ AdsManager.prototype.onAdLoaded = function() {
 AdsManager.prototype.onAdDurationChange = function() {
   console.log('onAdDurationChange');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
-    this._attributes.duration = this._isCreativeFunctionInvokable("getAdDuration") ? this._vpaidCreative.getAdDuration() : -1;
+    this._attributes.duration = this._isCreativeFunctionInvokable('getAdDuration') ? this._vpaidCreative.getAdDuration() : -1;
     console.log('update tracker with new duration', this._attributes.duration);
-    if(this._attributes.duration != -1) {
+    if(this._attributes.duration !== -1) {
       this._vastTracker.setDuration(this._attributes.duration);
     }
   }
@@ -265,9 +259,9 @@ AdsManager.prototype.onAdImpression = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     if (!this._hasImpression) {
       // Check duration
-      this._attributes.duration = this._isCreativeFunctionInvokable("getAdDuration") ? this._vpaidCreative.getAdDuration() : -1;
+      this._attributes.duration = this._isCreativeFunctionInvokable('getAdDuration') ? this._vpaidCreative.getAdDuration() : -1;
       console.log('update tracker with new duration', this._attributes.duration);
-      if(this._attributes.duration != -1) {
+      if(this._attributes.duration !== -1) {
         this._vastTracker.setDuration(this._attributes.duration);
       }
       /*
@@ -292,7 +286,6 @@ AdsManager.prototype.onAdImpression = function() {
   }
 }
 AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
-  // TODO:
   console.log('onAdClickThru', url, id, playerHandles);
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.click();
@@ -543,7 +536,7 @@ AdsManager.prototype.creativeAssetLoaded = function() {
   }() && checkVPAIDMinVersion()) {
 
     console.log('VPAID is OK');
-
+    // VPAID events
     that._creativeEventCallbacks = {
       AdStarted: that.onAdStarted,
       AdStopped: that.onAdStopped,
@@ -576,8 +569,8 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     that.setCallbacksForCreative(that._creativeEventCallbacks, that);
 
     // Prepare for iniAd
-    var width = that._attributes.width; //that._videoSlot.clientWidth;
-    var height = that._attributes.height; // that._videoSlot.clientHeight;
+    var width = that._attributes.width;
+    var height = that._attributes.height;
     var creativeData = {
       AdParameters: that._creative.adParameters
     };
@@ -601,10 +594,10 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   vpaidIframe == null ? document.body.appendChild(iframe) : document.body.replaceChild(iframe, vpaidIframe); // this._adContainer.appendChild(iframe) : this._adContainer.replaceChild(iframe, vpaidIframe);
   iframe.width = 0;
   iframe.height = 0;
-  iframe.style.display = "none";
+  iframe.style.display = 'none';
   iframe.setAttribute('allowfullscreen', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.setAttribute('allow', "autoplay;");
+  iframe.setAttribute('allow', 'autoplay;');
   iframe.tabIndex = -1;
   iframe.contentWindow.document.open();
   // CORS?
@@ -612,7 +605,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   iframe.contentWindow.document.close();
   var that = this;
   this._loadIntervalTimer = setInterval(function() {
-    var VPAIDAd = document.getElementById("vpaidIframe").contentWindow.getVPAIDAd;
+    var VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
     VPAIDAd && typeof VPAIDAd === 'function' && (clearInterval(that._loadIntervalTimer), VPAIDAd = VPAIDAd(), typeof VPAIDAd === 'undefined' ? console.log('getVPAIDAd() returns undefined value') : VPAIDAd == null ? console.log('getVPAIDAd() returns null') : (that._vpaidCreative = VPAIDAd, that.creativeAssetLoaded()))
   }, 200);
 
@@ -837,7 +830,7 @@ AdsManager.prototype.getDuration = function() {
 AdsManager.prototype.pause = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._isCreativeFunctionInvokable("pauseAd") && this._vpaidCreative.pauseAd();
+      this._isCreativeFunctionInvokable('pauseAd') && this._vpaidCreative.pauseAd();
     } else {
       console.log('pause > video');
       this._videoSlot.pause();
@@ -848,7 +841,7 @@ AdsManager.prototype.pause = function() {
 AdsManager.prototype.resume = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._isCreativeFunctionInvokable("resumeAd") && this._vpaidCreative.resumeAd();
+      this._isCreativeFunctionInvokable('resumeAd') && this._vpaidCreative.resumeAd();
     } else {
       console.log('resume > video');
       this._videoSlot.play();
@@ -868,7 +861,7 @@ AdsManager.prototype.stop = function() {
 AdsManager.prototype.skip = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._isCreativeFunctionInvokable("skipAd") && this._vpaidCreative.skipAd();
+      this._isCreativeFunctionInvokable('skipAd') && this._vpaidCreative.skipAd();
     } else {
       console.log('skip > video');
       this.onAdSkipped();
@@ -887,7 +880,7 @@ AdsManager.prototype.resize = function(width, height, viewMode) {
 
     if (this._isVPAID && this._vpaidCreative) {
       console.log('resize > vpaid', width, height, viewMode);
-      this._isCreativeFunctionInvokable("resizeAd") && this._vpaidCreative.resizeAd(width, height, viewMode);
+      this._isCreativeFunctionInvokable('resizeAd') && this._vpaidCreative.resizeAd(width, height, viewMode);
     } else {
       console.log('resize > video', width, height, viewMode);
       this.onAdSizeChange();
@@ -897,7 +890,7 @@ AdsManager.prototype.resize = function(width, height, viewMode) {
 AdsManager.prototype.getVolume = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      return this._isCreativeFunctionInvokable("getAdVolume") ? this._vpaidCreative.getAdVolume() : -1;
+      return this._isCreativeFunctionInvokable('getAdVolume') ? this._vpaidCreative.getAdVolume() : -1;
     } else {
       console.log('getVolume > video');
     }
@@ -906,7 +899,7 @@ AdsManager.prototype.getVolume = function() {
 AdsManager.prototype.setVolume = function(value) {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._isCreativeFunctionInvokable("setAdVolume") && this._vpaidCreative.setAdVolume(value);
+      this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(value);
     } else {
       console.log('setVolume > video');
     }
@@ -915,7 +908,7 @@ AdsManager.prototype.setVolume = function(value) {
 AdsManager.prototype.getRemainingTime = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      return this._isCreativeFunctionInvokable("getAdRemainingTime") ? this._vpaidCreative.getAdRemainingTime() : -1
+      return this._isCreativeFunctionInvokable('getAdRemainingTime') ? this._vpaidCreative.getAdRemainingTime() : -1
     } else {
       return this._attributes.remainingTime;
     }
