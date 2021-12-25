@@ -58,7 +58,8 @@ const AdsManager = function(adContainer) {
     desiredBitrate : 268,
     duration : 10,
     remainingTime : 10,
-    currentTime : 0
+    currentTime : 0,
+    volume : 0
   }
 
   this._vastClient = null;
@@ -620,29 +621,8 @@ AdsManager.prototype.removeCreativeAsset = function() {
 AdsManager.prototype.destroyAd = function() {
 
   console.log('destroyAd');
-  /*
-  if(this._isVPAID) {
-      // Unsubscribe for VPAID events
-      console.log('unsubscribe for VPAID events');
-      this.removeCallbacksForCreative(this._creativeEventCallbacks);
-      this.removeCreativeAsset();
-  }
-  //this.removeVideoSlot();
-  this.removeSlot();
-
-  // Reset global variables to default values
-  this._isVPAID = false;
-
-  this._hasImpression = false;
-  this._hasStarted = false;
-
-  this._ad = null;
-  this._creative = null;
-  this._mediaFile = null;
-  this._vpaidCreative = null;
-  this._vastTracker = null;
-   */
   this.destroy();
+  // TODO:
 
   // Dispatch AllAdsCompleted
   this.onAllAdsCompleted();
@@ -807,20 +787,19 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 AdsManager.prototype.start = function() {
 
   console.log('start > ad');
-  var that = this;
   if(this.isCreativeExists()) {
     this._videoSlot.muted = true;
 
-    if (this._isVPAID && this._vpaidCreative) {
+    if (this._isVPAID) {
       console.log('start > vpaid', this._isVPAID, this._vpaidCreative);
-      this._vpaidCreative.startAd();
+      this._isCreativeFunctionInvokable('startAd') && this._vpaidCreative.startAd();
     } else {
 
       //this._videoSlot.autoplay = true;
       this._videoSlot.load();
       this._videoSlot.play();
 
-      that.onAdStarted();
+      this.onAdStarted();
     }
   }
 }
@@ -852,7 +831,7 @@ AdsManager.prototype.resume = function() {
 AdsManager.prototype.stop = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._vpaidCreative.stopAd();
+      this._isCreativeFunctionInvokable('stopAd') && this._vpaidCreative.stopAd();
     } else {
       this.onAdStopped();
     }
@@ -878,7 +857,7 @@ AdsManager.prototype.resize = function(width, height, viewMode) {
     // Resize slot
     this.resizeSlot(this._attributes.width, this._attributes.height);
 
-    if (this._isVPAID && this._vpaidCreative) {
+    if (this._isVPAID) {
       console.log('resize > vpaid', width, height, viewMode);
       this._isCreativeFunctionInvokable('resizeAd') && this._vpaidCreative.resizeAd(width, height, viewMode);
     } else {
@@ -891,9 +870,8 @@ AdsManager.prototype.getVolume = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
       return this._isCreativeFunctionInvokable('getAdVolume') ? this._vpaidCreative.getAdVolume() : -1;
-    } else {
-      console.log('getVolume > video');
     }
+    return this._videoSlot.volume;
   }
 }
 AdsManager.prototype.setVolume = function(value) {
@@ -901,7 +879,12 @@ AdsManager.prototype.setVolume = function(value) {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(value);
     } else {
-      console.log('setVolume > video');
+      const isVolumeChanged = value !== this._videoSlot.volume;
+      if(isVolumeChanged) {
+        this._attributes.volume = value;
+        this._videoSlot.volume = value;
+        this.onAdVolumeChange();
+      }
     }
   }
 }
@@ -909,9 +892,8 @@ AdsManager.prototype.getRemainingTime = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
       return this._isCreativeFunctionInvokable('getAdRemainingTime') ? this._vpaidCreative.getAdRemainingTime() : -1
-    } else {
-      return this._attributes.remainingTime;
     }
+    return this._attributes.remainingTime;
   }
 }
 AdsManager.prototype.collapse = function() {
