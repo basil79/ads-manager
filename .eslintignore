@@ -1,4 +1,5 @@
 dist/
+dist_old/
 public/
 .babelrc
 !.eslintrc.js

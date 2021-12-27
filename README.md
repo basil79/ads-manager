@@ -71,8 +71,8 @@ adsManager.addEventListener('AdStarted', function() {
 // ...
 // AdDurationChange
 // AdSizeChange
-// AdVideoStart
 // AdImpression
+// AdVideoStart
 // AdVideoFirstQuartile
 // AdVideoMidpoint
 // AdVideoThirdQuartile
@@ -92,8 +92,18 @@ adsManager.addEventListener('AllAdsCompleted', function() {
 
 // VAST tag url
 let vastUrl = 'your VAST tag url';
+
 // Request Ads
 adsManager.requestAds(vastUrl);
+
+/*
+// VAST XML
+let vastXML = `<?xml version="1.0" encoding="UTF-8"?>
+    <VAST version="2.0">
+      <Error><![CDATA[http://example.com/empty-no-ad]]></Error>
+    </VAST>`;
+adsManager.requestAds(vastXML);
+ */
 ```
 
 ## Install
@@ -102,6 +112,26 @@ adsManager.requestAds(vastUrl);
     $ cd ads-manager
     $ npm ci
 
+
+## Build
+
+To build the project for development:
+    
+    $ npm run build:dev
+
+To build the project for production:
+
+    $ npm run build:prod
+
+This will generate the following file:
+
++ `./dist/ads-manager.js` - Minified production code
+
+## Run
+
+    $ npm start
+
+Then navigate to: http://localhost:8081 in your browser
 
 ### Supported Browsers
 

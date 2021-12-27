@@ -1,4 +1,4 @@
-import { VASTClient, VASTTracker } from 'vast-client';
+import { VASTClient, VASTParser, VASTTracker } from 'vast-client';
 
 const AdsManager = function(adContainer) {
 
@@ -387,87 +387,111 @@ AdsManager.prototype.onAdLog = function(message) {
     }
   }
 }
+AdsManager.prototype.processVASTResponse = function(res) {
+
+  console.log('processVASTResponse', res);
+
+  var ads = res.ads;
+  if(ads.length != 0) {
+    console.log('ads length', ads.length);
+    if(ads.length > 1) {
+      // Ad pod
+      console.log('AdsManagerLoaded > ad pod');
+      // TODO:
+      this.onAdsManagerLoaded();
+    } else {
+      // Ad
+      console.log(this._videoSlot, ads[0]);
+
+      this._ad = ads[0];
+      // Filter linear creatives, get first
+      this._creative = ads[0].creatives.filter(creative => creative.type === 'linear')[0];
+      // Check if creative has media files
+      if(this._creative && this._creative.mediaFiles.length != 0) {
+
+        console.log('is linear creative ? > YES', this._creative);
+        // Filter and check media files for mime type canPlay and if VPAID or not
+        this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
+          // mime types -> mp4, webm, ogg
+          if(this.canPlayVideoType(mediaFile.mimeType)) {
+            console.log('can play', mediaFile);
+            return mediaFile;
+          } else if(mediaFile.mimeType === 'application/javascript') {
+            // apiFramework -> mime type -> application/javascript
+            console.log('can play -> vpaid', mediaFile);
+            return mediaFile;
+          }
+        });//[0]; // take the first one
+
+        // Sort media files by size
+        this._mediaFiles.sort(function(a, b) {
+          let aHeight = a.height;
+          let bHeight = b.height;
+          return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
+        });
+
+        console.log('sorted media files', this._mediaFiles);
+
+        if(this._mediaFiles && this._mediaFiles.length != 0) {
+          // TODO: move after adLoaded
+          // Init VAST Tracker for tracking events
+          this._vastTracker = new VASTTracker(null, this._ad, this._creative);
+          this._vastTracker.load();
+
+          // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
+          this.onAdsManagerLoaded();
+        } else {
+          console.log('no media compatible files');
+        }
+
+      } else {
+        console.log('NOT LINEAR');
+      }
+    }
+
+  } else {
+    // TODO:
+    this.onAdError('The VAST response document is empty.');
+  }
+}
 AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
 
-  // destroy
+  // Destroy
   this.destroy();
 
   console.log('request ads', vastUrl);
 
-  var that = this;
-  this._vastClient = new VASTClient();
-  this._vastClient
-    .get(vastUrl, options)
-    .then(res => {
+  let isURL = false;
+  try {
+    new URL(vastUrl);
+    isURL = true;
+  } catch (e) {}
 
-      console.log(res);
-      var ads = res.ads;
-      if(ads.length != 0) {
-        console.log('ads length', ads.length);
-        if(ads.length > 1) {
-          // Ad pod
-          console.log('AdsManagerLoaded > ad pod');
-          that.onAdsManagerLoaded();
-        } else {
-          // Ad
-          console.log(that._videoSlot, ads[0]);
-
-          that._ad = ads[0];
-          // Filter linear creatives, get first
-          that._creative = ads[0].creatives.filter(creative => creative.type === 'linear')[0];
-          // Check if creative has media files
-          if(that._creative && that._creative.mediaFiles.length != 0) {
-
-            console.log('is linear creative ? > YES', that._creative);
-            // Filter and check media files for mime type canPlay and if VPAID or not
-            that._mediaFiles = that._creative.mediaFiles.filter(mediaFile => {
-              // mime types -> mp4, webm, ogg
-              if(that.canPlayVideoType(mediaFile.mimeType)) {
-                console.log('can play', mediaFile);
-                return mediaFile;
-              } else if(mediaFile.mimeType === 'application/javascript') {
-                // apiFramework -> mime type -> application/javascript
-                console.log('can play -> vpaid', mediaFile);
-                return mediaFile;
-              }
-            });//[0]; // take the first one
-
-            // Sort media files by size
-            that._mediaFiles.sort(function(a, b) {
-              var aHeight = a.height;
-              var bHeight = b.height;
-              return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
-            });
-
-            console.log('sorted media files', that._mediaFiles);
-
-            if(that._mediaFiles && that._mediaFiles.length != 0) {
-              // TODO: move after adLoaded
-              // Init VAST Tracker for tracking events
-              that._vastTracker = new VASTTracker(that._vastClient, that._ad, that._creative);
-              that._vastTracker.load();
-
-              // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
-              that.onAdsManagerLoaded();
-            } else {
-              console.log('no media compatible files');
-            }
-
-          } else {
-            console.log('NOT LINEAR');
-          }
-        }
-
-      } else {
-        // TODO:
-        that.onAdError('The VAST response document is empty.');
-      }
-
-    })
-    .catch(err => {
-      console.log(err);
-      that.onAdError(err.message);
-    });
+  if(isURL) {
+    console.log('use as URL');
+    this._vastClient = new VASTClient();
+    this._vastClient
+      .get(vastUrl, options)
+      .then(res => {
+        this.processVASTResponse(res);
+      })
+      .catch(err => {
+        console.log(err);
+        this.onAdError(err.message);
+      });
+  } else {
+    console.log('try to use as XML');
+    const vastXml = (new window.DOMParser()).parseFromString(vastUrl, 'text/xml');
+    const vastParser = new VASTParser();
+    vastParser
+      .parseVAST(vastXml)
+      .then(res => {
+        this.processVASTResponse(res);
+      })
+      .catch(err => {
+        this.onAdError(err.message);
+      });
+  }
 
 }
 AdsManager.prototype.canPlayVideoType = function(mimeType) {
