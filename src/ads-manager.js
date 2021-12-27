@@ -63,6 +63,7 @@ const AdsManager = function(adContainer) {
   }
 
   this._vastClient = null;
+  this._vastParser = null;
   this._vastTracker = null;
 
   this._ad = null;
@@ -459,40 +460,44 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
   // Destroy
   this.destroy();
 
-  console.log('request ads', vastUrl);
+  // Check if vastUrl exists
+  if(vastUrl && typeof vastUrl === 'string') {
+    console.log('request ads', vastUrl);
 
-  let isURL = false;
-  try {
-    new URL(vastUrl);
-    isURL = true;
-  } catch (e) {}
+    let isURL = false;
+    try {
+      new URL(vastUrl);
+      isURL = true;
+    } catch (e) {
+    }
 
-  if(isURL) {
-    console.log('use as URL');
-    this._vastClient = new VASTClient();
-    this._vastClient
-      .get(vastUrl, options)
-      .then(res => {
-        this.processVASTResponse(res);
-      })
-      .catch(err => {
-        console.log(err);
-        this.onAdError(err.message);
-      });
+    if (isURL) {
+      console.log('use as URL');
+      this._vastClient = new VASTClient();
+      this._vastClient
+        .get(vastUrl, options)
+        .then(res => {
+          this.processVASTResponse(res);
+        })
+        .catch(err => {
+          this.onAdError(err.message);
+        });
+    } else {
+      console.log('try to use as XML');
+      const vastXml = (new window.DOMParser()).parseFromString(vastUrl, 'text/xml');
+      this._vastParser = new VASTParser();
+      this._vastParser
+        .parseVAST(vastXml, options)
+        .then(res => {
+          this.processVASTResponse(res);
+        })
+        .catch(err => {
+          this.onAdError(err.message);
+        });
+    }
   } else {
-    console.log('try to use as XML');
-    const vastXml = (new window.DOMParser()).parseFromString(vastUrl, 'text/xml');
-    const vastParser = new VASTParser();
-    vastParser
-      .parseVAST(vastXml)
-      .then(res => {
-        this.processVASTResponse(res);
-      })
-      .catch(err => {
-        this.onAdError(err.message);
-      });
+    this.onAdError('VAST URL/XML is empty');
   }
-
 }
 AdsManager.prototype.canPlayVideoType = function(mimeType) {
   if(mimeType === 'video/webm' && this.supportsWebmVideo()) {
