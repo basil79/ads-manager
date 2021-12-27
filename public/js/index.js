@@ -190,9 +190,15 @@
 
     // Request ads
     console.log('ad request');
-    adsManager.requestAds(vastUrl, {
-        resolveAll : false
-    });
+
+    // Test VAST XML instead of VAST URL
+    var vastXML = `<?xml version="1.0" encoding="UTF-8"?>
+    <VAST version="2.0">
+      <Error><![CDATA[http://example.com/empty-no-ad]]></Error>
+    </VAST>`;
+    //adsManager.requestAds(vastXML);
+
+    adsManager.requestAds(vastUrl);
 
     /*
     setInterval(function() {
