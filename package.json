@@ -2,6 +2,9 @@
   "name": "ads-manager",
   "version": "1.0.0",
   "description": "",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
   "main": "src/index.js",
   "scripts": {
     "contBuild": "watch \"npm run build:dev\" src",
