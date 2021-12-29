@@ -137,18 +137,17 @@ AdsManager.prototype.updateVPAIDProgress = function() {
   }
 }
 AdsManager.prototype.startVPAIDProgress = function() {
-  const that = this;
   console.log('start vpaid progress');
   if(this._vpaidProgressCounter) {
     clearInterval(this._vpaidProgressCounter);
     this._vpaidProgressCounter = null;
   }
-  this._vpaidProgressCounter = setInterval(function() {
-    if(that._isVPAID && that._vpaidCreative && that._vastTracker) {
-      that.updateVPAIDProgress();
+  this._vpaidProgressCounter = setInterval(() => {
+    if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
+      this.updateVPAIDProgress();
     } else {
       console.log('stop VPAID progress');
-      that.stopVPAIDProgress();
+      this.stopVPAIDProgress();
     }
   }, 1000);
 }
@@ -161,7 +160,7 @@ AdsManager.prototype.stopVPAIDProgress = function() {
 }
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
   console.log('subscribe for event', eventName);
-  var givenCallback = callback.bind(context);
+  const givenCallback = callback.bind(context);
   this._eventCallbacks[eventName] = givenCallback;
 }
 AdsManager.prototype.removeEventListener = function(eventName) {
@@ -514,18 +513,15 @@ AdsManager.prototype.supportsVideo = function() {
 }
 AdsManager.prototype.supportsH264BaselineVideo = function() {
   if(!this.supportsVideo()) return false;
-  var video = document.createElement('video');
-  return video.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+  return document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
 }
 AdsManager.prototype.supportsOggTheoraVideo = function() {
   if(!this.supportsVideo()) return false;
-  var video = document.createElement('video');
-  return video.canPlayType('video/ogg; codecs="theora, vorbis"');
+  return document.createElement('video').canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 AdsManager.prototype.supportsWebmVideo = function() {
   if(!this.supportsVideo()) return false;
-  var video = document.createElement('video');
-  return video.canPlayType('video/webm; codecs="vp8, vorbis"');
+  return document.createElement('video').canPlayType('video/webm; codecs="vp8, vorbis"');
 }
 AdsManager.prototype.handshakeVersion = function(version) {
   console.log('VPAID Creative: handshakeVersion(' + version + ')');
@@ -567,57 +563,57 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 
     console.log('VPAID is OK');
     // VPAID events
-    that._creativeEventCallbacks = {
-      AdStarted: that.onAdStarted,
-      AdStopped: that.onAdStopped,
-      AdSkipped: that.onAdSkipped,
-      AdLoaded: that.onAdLoaded,
-      //AdLinearChange: that.onAdLinearChange,
-      AdSizeChange: that.onAdSizeChange,
-      //AdExpandedChange: that.onAdExpandedChange,
-      AdDurationChange: that.onAdDurationChange,
-      AdVolumeChange: that.onAdVolumeChange,
-      AdImpression: that.onAdImpression,
-      AdClickThru: that.onAdClickThru,
-      //AdInteraction: that.onAdInteraction,
-      AdVideoStart: that.onAdVideoStart,
-      AdVideoFirstQuartile: that.onAdVideoFirstQuartile,
-      AdVideoMidpoint: that.onAdVideoMidpoint,
-      AdVideoThirdQuartile: that.onAdVideoThirdQuartile,
-      AdVideoComplete: that.onAdVideoComplete,
-      //AdUserAcceptInvitation: that.onAdUserAcceptInvitation,
-      //AdUserMinimize: that.onAdUserMinimize,
-      //AdUserClose: that.onAdUserClose,
-      AdPaused: that.onAdPaused,
-      AdPlaying: that.onAdPlaying, // onAdResumed
-      AdError: that.onAdError,
-      AdLog: that.onAdLog
+    this._creativeEventCallbacks = {
+      AdStarted: this.onAdStarted,
+      AdStopped: this.onAdStopped,
+      AdSkipped: this.onAdSkipped,
+      AdLoaded: this.onAdLoaded,
+      //AdLinearChange: this.onAdLinearChange,
+      AdSizeChange: this.onAdSizeChange,
+      //AdExpandedChange: this.onAdExpandedChange,
+      AdDurationChange: this.onAdDurationChange,
+      AdVolumeChange: this.onAdVolumeChange,
+      AdImpression: this.onAdImpression,
+      AdClickThru: this.onAdClickThru,
+      //AdInteraction: this.onAdInteraction,
+      AdVideoStart: this.onAdVideoStart,
+      AdVideoFirstQuartile: this.onAdVideoFirstQuartile,
+      AdVideoMidpoint: this.onAdVideoMidpoint,
+      AdVideoThirdQuartile: this.onAdVideoThirdQuartile,
+      AdVideoComplete: this.onAdVideoComplete,
+      //AdUserAcceptInvitation: this.onAdUserAcceptInvitation,
+      //AdUserMinimize: this.onAdUserMinimize,
+      //AdUserClose: this.onAdUserClose,
+      AdPaused: this.onAdPaused,
+      AdPlaying: this.onAdPlaying, // onAdResumed
+      AdError: this.onAdError,
+      AdLog: this.onAdLog
     }
 
     // Subscribe for VPAID events
     console.log('subscribe for VPAID events');
-    that.setCallbacksForCreative(that._creativeEventCallbacks, that);
+    this.setCallbacksForCreative(this._creativeEventCallbacks, this);
 
     // Prepare for iniAd
-    var width = that._attributes.width;
-    var height = that._attributes.height;
+    var width = this._attributes.width;
+    var height = this._attributes.height;
     var creativeData = {
-      AdParameters: that._creative.adParameters
+      AdParameters: this._creative.adParameters
     };
-    var environmentVars = {
-      slot: that._slot,
-      videoSlot: that._videoSlot,
+    const environmentVars = {
+      slot: this._slot,
+      videoSlot: this._videoSlot,
       videoSlotCanAutoPlay: true
     };
     // iniAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars)
-    console.log('vpaid initAd >', width, height, that._attributes.viewMode, that._attributes.desiredBitrate, creativeData, environmentVars);
-    that._vpaidCreative.initAd(width, height, that._attributes.viewMode, that._attributes.desiredBitrate, creativeData, environmentVars);
+    console.log('vpaid initAd >', width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
+    this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
 
   }
 }
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   console.log('load creative asset >', fileURL);
-  var vpaidIframe = document.getElementById('vpaidIframe'),
+  const vpaidIframe = document.getElementById('vpaidIframe'),
     iframe = document.createElement('iframe');
 
   iframe.id = 'vpaidIframe';
@@ -633,10 +629,11 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   // CORS?
   iframe.contentWindow.document.write('<script type="text/javascript" src="' + fileURL + '"> \x3c/script>');
   iframe.contentWindow.document.close();
-  var that = this;
-  this._loadIntervalTimer = setInterval(function() {
-    var VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
-    VPAIDAd && typeof VPAIDAd === 'function' && (clearInterval(that._loadIntervalTimer), VPAIDAd = VPAIDAd(), typeof VPAIDAd === 'undefined' ? console.log('getVPAIDAd() returns undefined value') : VPAIDAd == null ? console.log('getVPAIDAd() returns null') : (that._vpaidCreative = VPAIDAd, that.creativeAssetLoaded()))
+
+
+  this._loadIntervalTimer = setInterval(() => {
+    let VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
+    VPAIDAd && typeof VPAIDAd === 'function' && (clearInterval(this._loadIntervalTimer), VPAIDAd = VPAIDAd(), typeof VPAIDAd === 'undefined' ? console.log('getVPAIDAd() returns undefined value') : VPAIDAd == null ? console.log('getVPAIDAd() returns null') : (this._vpaidCreative = VPAIDAd, this.creativeAssetLoaded()))
   }, 200);
 
 }
@@ -763,7 +760,7 @@ AdsManager.prototype.init = function(width, height, viewMode) {
           }
           console.log('open window', url);
           // Open the resolved clickThrough url
-          var opener = window.open(url, '_blank');
+          const opener = window.open(url, '_blank');
           void 0 !== opener ? opener.focus() : window.location.href = url;
         });
         this._vastTracker.on('creativeView', () => {
