@@ -40,7 +40,7 @@
     var videoElement = document.getElementById('video-element');
 
     var adContainer = document.getElementById('ad-container');
-    var adsManager = new weavo.AdsManager(adContainer);
+    var adsManager = new ssp4.tv.AdsManager(adContainer);
 
     var isAdPaused = false;
 

@@ -1,3 +1,8 @@
 import { AdsManager } from './ads-manager.js';
 
-export { AdsManager }
+const tv = {
+  AdsManager : AdsManager
+}
+
+export { tv }
+
