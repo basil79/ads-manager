@@ -8,7 +8,7 @@ module.exports = function(env) {
     output : {
       path: __dirname + (app.conf === 'prod' ? '/dist' : '/public/js'),
       filename : 'ads-manager.js',
-      library: 'weavo'
+      library: 'ssp4'
     },
     optimization: {
       minimize: app.conf === 'prod',
