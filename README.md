@@ -120,9 +120,9 @@ You can add the script directly to your page and access the library's components
 
 ```javascript
 // Get your HTML element for ad container
-var adContainer = document.getElementById('ad-container');
+let adContainer = document.getElementById('ad-container');
 // Define ads manager and pass ad container
-var adsManager = new ssp4.tv.AdsManager(adContainer);
+const adsManager = new ssp4.tv.AdsManager(adContainer);
 ```
 
 ## Install

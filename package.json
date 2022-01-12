@@ -1,7 +1,7 @@
 {
   "name": "ads-manager",
   "version": "1.0.3",
-  "description": "",
+  "description": "HTML5 Video Ads Manager based on vast-client-js and IMA SDK",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
