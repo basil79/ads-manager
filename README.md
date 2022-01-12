@@ -1,4 +1,5 @@
-
+[![npm version](https://badgen.net/npm/v/ads-manager)](https://badgen.net/npm/v/ads-manager)
+[![downloads per week](https://badgen.net/npm/dw/ads-manager)](https://badgen.net/npm/dw/ads-manager)
 [![license](https://badgen.net/github/license/basil79/ads-manager)](https://badgen.net/github/license/basil79/ads-manager)
 
 # ads-manager
