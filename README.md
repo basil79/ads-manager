@@ -106,6 +106,25 @@ adsManager.requestAds(vastXML);
  */
 ```
 
+### Pre-bundled versions
+
+#### Browser script
+
+A pre-bundled version of ads-manager is available: [`ads-manager.js`](dist/ads-manager.js) [minified].
+
+You can add the script directly to your page and access the library's components through the `ssp4.tv` object.
+
+```html
+<script src="ads-manager.js"></script>
+```
+
+```javascript
+// Get your HTML element for ad container
+var adContainer = document.getElementById('ad-container');
+// Define ads manager and pass ad container
+var adsManager = new ssp4.tv.AdsManager(adContainer);
+```
+
 ## Install
 
     $ git clone https://github.com/basil79/ads-manager
@@ -136,3 +155,7 @@ Then navigate to: http://localhost:8081 in your browser
 ### Supported Browsers
 
 ads-manager is supported all modern browsers.
+
+## Contribute
+
+See [CONTRIBUTING](./CONTRIBUTING.md)
