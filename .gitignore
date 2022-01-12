@@ -11,5 +11,5 @@ npm-debug.log
 .DS_Store
 
 # Dist folders
-dist/
+#dist/
 dist_old/
