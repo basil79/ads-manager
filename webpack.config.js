@@ -36,7 +36,6 @@ module.exports = function(env, args) {
   // Append NODE target for production
   if(args.mode === 'production') {
     targets.push({
-      target: 'node',
       entry : './src/ads-manager.js',
       output: {
         path: __dirname + '/dist',
