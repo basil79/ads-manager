@@ -20,7 +20,7 @@ This README is for developers who want to use and/or contribute to ads-manager.
 ## Usage
 
 ```javascript
-import { AdsManager } from './ads-manager';
+import { AdsManager } from 'ads-manager';
 
 // Get your video element
 let videoElement = document.getElementById('video');
@@ -128,6 +128,14 @@ const adsManager = new ssp4.tv.AdsManager(adContainer);
 
 ## Install
 
+### Get Started
+
+ads-manager is available as an NPM package and can be easily installed with:
+
+    $ npm i ads-manager 
+
+### Using Git
+
     $ git clone https://github.com/basil79/ads-manager
     $ cd ads-manager
     $ npm ci
@@ -143,9 +151,10 @@ To build the project for production:
 
     $ npm run build:prod
 
-This will generate the following file:
+This will generate the following files:
 
-+ `./dist/ads-manager.js` - Minified production code
++ `./dist/ads-manager.js` - Minified browser production code
++ `./dist/ads-manager.node.js` - Minified node production code
 
 ## Run
 
