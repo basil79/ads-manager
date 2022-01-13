@@ -1,5 +1,5 @@
 
-import { AdsManager } from '../src';
+import { AdsManager } from '../src/ads-manager';
 
 describe('AdsManager', function() {
   describe('#constructor', () => {
