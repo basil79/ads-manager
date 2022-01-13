@@ -151,10 +151,9 @@ To build the project for production:
 
     $ npm run build:prod
 
-This will generate the following files:
+This will generate the following file:
 
 + `./dist/ads-manager.js` - Minified browser production code
-+ `./dist/ads-manager.node.js` - Minified node production code
 
 ## Run
 
