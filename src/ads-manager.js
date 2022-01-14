@@ -1,4 +1,4 @@
-import { VASTClient, VASTParser, VASTTracker } from 'vast-client';
+import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
 
 const AdsManager = function(adContainer) {
 
