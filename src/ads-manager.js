@@ -1,5 +1,6 @@
 import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
 import AdError from './ad-error';
+import { replaceMessage } from './utils';
 
 const AdsManager = function(adContainer) {
 
@@ -178,7 +179,7 @@ AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
   console.log('start VAST media load timeout');
   this._vastMediaLoadTimeoutId = setTimeout(() => {
-    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT);
+    this.onAdError(replaceMessage(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.message, this._attributes.loadVideoTimeout));
   }, this._attributes.loadVideoTimeout);
 }
 AdsManager.prototype.updateVPAIDProgress = function() {
