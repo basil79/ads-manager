@@ -15,7 +15,8 @@ AdError.prototype.getInnerError = function() {
   return this.innerError instanceof Object ? this.innerError : null;
 }
 AdError.prototype.replace = function(...values) {
-  replaceMessage(this.message, values);
+  this.message = replaceMessage(this.message, values);
+  return this;
 }
 AdError.prototype.toString = function() {
   return 'AdError ' + this.getErrorCode() + ': ' + this.getMessage() + (null != this.getInnerError() ? ' Caused by: ' + this.getInnerError() : '');
