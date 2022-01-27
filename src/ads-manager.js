@@ -471,7 +471,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
           console.log('is linear creative ? > YES', this._creative);
           // Filter and check media files for mime type canPlay and if VPAID or not
           this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
-            // mime types -> mp4, webm, ogg
+            // mime types -> mp4, webm, ogg, 3gp
             if(this.canPlayVideoType(mediaFile.mimeType)) {
               console.log('can play', mediaFile);
               return mediaFile;
@@ -591,7 +591,9 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
   }
 }
 AdsManager.prototype.canPlayVideoType = function(mimeType) {
-  if(mimeType === 'video/webm' && this.supportsWebmVideo()) {
+  if(mimeType === 'video/3gpp' && this.supportsThreeGPVideo()) {
+    return true;
+  } else if(mimeType === 'video/webm' && this.supportsWebmVideo()) {
     return true;
   } else if(mimeType === 'video/ogg' && this.supportsOggTheoraVideo()) {
     return true;
@@ -614,6 +616,10 @@ AdsManager.prototype.supportsOggTheoraVideo = function() {
 AdsManager.prototype.supportsWebmVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/webm; codecs="vp8, vorbis"');
+}
+AdsManager.prototype.supportsThreeGPVideo = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('video/3gpp; codecs="mp4v.20.8, samr"');
 }
 AdsManager.prototype.handshakeVersion = function(version) {
   console.log('VPAID Creative: handshakeVersion(' + version + ')');
