@@ -1,4 +1,4 @@
-import { replaceMessage } from './utils';
+import { format } from './utils';
 
 const AdError = function(errorCode, message, innerError) {
   this.errorCode = errorCode;
@@ -14,8 +14,8 @@ AdError.prototype.getMessage = function() {
 AdError.prototype.getInnerError = function() {
   return this.innerError instanceof Object ? this.innerError : null;
 }
-AdError.prototype.replace = function(...values) {
-  this.message = replaceMessage(this.message, values);
+AdError.prototype.formatMessage = function(...values) {
+  this.message = format(this.message, values);
   return this;
 }
 AdError.prototype.toString = function() {

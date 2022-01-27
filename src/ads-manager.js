@@ -178,7 +178,7 @@ AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
   console.log('start VAST media load timeout');
   this._vastMediaLoadTimeoutId = setTimeout(() => {
-    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.replace(this._attributes.loadVideoTimeout));
+    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._attributes.loadVideoTimeout));
   }, this._attributes.loadVideoTimeout);
 }
 AdsManager.prototype.updateVPAIDProgress = function() {
@@ -569,6 +569,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
           this.processVASTResponse(res);
         })
         .catch(err => {
+          console.log(err);
           this.onAdError(err.message);
         });
     } else {
@@ -581,6 +582,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
           this.processVASTResponse(res);
         })
         .catch(err => {
+          console.log(err);
           this.onAdError(err.message);
         });
     }
@@ -685,9 +687,9 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     this.setCallbacksForCreative(this._creativeEventCallbacks, this);
 
     // Prepare for iniAd
-    var width = this._attributes.width;
-    var height = this._attributes.height;
-    var creativeData = {
+    const width = this._attributes.width;
+    const height = this._attributes.height;
+    const creativeData = {
       AdParameters: this._creative.adParameters
     };
     const environmentVars = {
@@ -731,7 +733,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 }
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
-  var vpaidIframe = document.getElementById('vpaidIframe');
+  const vpaidIframe = document.getElementById('vpaidIframe');
   if(vpaidIframe) {
     vpaidIframe.parentNode.removeChild(vpaidIframe);
   }
@@ -810,7 +812,7 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         }, false);
         this._videoSlot.addEventListener('timeupdate', function(event) {
           if(that.isCreativeExists()) {
-            var percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
+            const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
             if (percentPlayed >= 0) {
               if (!that._hasImpression) {
                 that._vastTracker && that._vastTracker.trackImpression();

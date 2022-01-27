@@ -1,4 +1,4 @@
-function replaceMessage(message, ...values) {
+function format(message, ...values) {
   try {
     values.forEach(function(value, key) {
       message = message.replace(
@@ -11,5 +11,5 @@ function replaceMessage(message, ...values) {
 }
 
 export {
-  replaceMessage
+  format
 }
