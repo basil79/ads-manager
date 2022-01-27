@@ -221,6 +221,11 @@
         eventsList.innerHTML = '';
 
         var giveVastUrl = document.getElementById('vast-url-input').value;
+
+        if(videoElement.paused) {
+          videoElement.play();
+        }
+
         adsManager.requestAds(giveVastUrl, {
             resolveAll : false
         });
