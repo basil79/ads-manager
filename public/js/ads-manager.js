@@ -1,5 +1,5 @@
 /*!
- * ads-manager v1.0.7 development
+ * ads-manager v1.0.8 development
  * Updated : 2022-01-27
  */
 /*
