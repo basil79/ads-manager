@@ -198,7 +198,10 @@
     </VAST>`;
     //adsManager.requestAds(vastXML);
 
-    adsManager.requestAds(vastUrl);
+    adsManager.requestAds(vastUrl, {
+      resolveAll : false,
+      withCredentials: false
+    });
 
     /*
     setInterval(function() {
@@ -227,7 +230,8 @@
         }
 
         adsManager.requestAds(giveVastUrl, {
-            resolveAll : false
+          resolveAll : false,
+          withCredentials: false
         });
     }, false);
 
