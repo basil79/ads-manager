@@ -4,7 +4,7 @@
 
 # ads-manager
 
-> HTML5 Video Ads Manager based on @dailymotion/vast-client and Google IMA SDK
+> HTML5 Video Ads Manager based on @dailymotion/vast-client
 
 This README is for developers who want to use and/or contribute to ads-manager.
 
