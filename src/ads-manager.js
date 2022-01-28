@@ -1,5 +1,6 @@
 import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
 import AdError from './ad-error';
+import IMAWrapper from './ima-wrapper';
 
 const AdsManager = function(adContainer) {
 
@@ -14,6 +15,10 @@ const AdsManager = function(adContainer) {
   this._slot = null;
   // Video Slot
   this._videoSlot = null;
+
+  // IMA Wrapper
+  this._imaWrapper = new IMAWrapper();
+
 
   // Create Slot
   this.createSlot();
@@ -89,7 +94,7 @@ const AdsManager = function(adContainer) {
     VAST_LINEAR_ASSET_MISMATCH: 'Linear assets were found in the VAST ad response, but none of them matched the player\'s capabilities.', // 403
     VAST_LOAD_TIMEOUT: 'Ad request reached a timeout.', // 301
     VAST_MEDIA_LOAD_TIMEOUT: 'VAST media file loading reached a timeout of {0} seconds.', // 402
-    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for moder info.' // 901
+    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for more info.' // 901
   };
   // Errors
   this.ERRORS = {
