@@ -54,7 +54,11 @@
         }
 
         isAdPaused = false;
-        videoElement.play();
+        if(videoElement.paused) {
+          videoElement.play();
+        }
+
+      disableAdButtons();
     });
     adsManager.addEventListener('AdsManagerLoaded', function() {
         console.log('AdsManagerLoaded');
@@ -198,10 +202,7 @@
     </VAST>`;
     //adsManager.requestAds(vastXML);
 
-    adsManager.requestAds(vastUrl, {
-      resolveAll : false,
-      withCredentials: false
-    });
+    adsManager.requestAds(vastUrl);
 
     /*
     setInterval(function() {
@@ -229,10 +230,7 @@
           videoElement.play();
         }
 
-        adsManager.requestAds(giveVastUrl, {
-          resolveAll : false,
-          withCredentials: false
-        });
+        adsManager.requestAds(giveVastUrl);
     }, false);
 
     pauseAdButton.addEventListener('click', function(event) {

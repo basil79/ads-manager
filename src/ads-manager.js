@@ -60,11 +60,18 @@ const AdsManager = function(adContainer) {
     duration: 10,
     remainingTime: 10,
     currentTime: 0,
-    volume: 0,
-    vastLoadTimeout: 23000, // Default value is 23000 ms = 23 sec
-    loadVideoTimeout: 8000, // Default value is 8000 ms = 8 sec
-  }
-
+    volume: 0
+  };
+  // Options
+  this._options = {
+    autoplay: true,
+    muted: true,
+    vastLoadTimeout: 23000,
+    loadVideoTimeout: 8000,
+    withCredentials: false,
+    wrapperLimit: 10,
+    resolveAll: true
+  };
   // Error codes
   this.ERROR_CODES = {
     ADS_REQUEST_NETWORK_ERROR: 1012,
@@ -75,7 +82,8 @@ const AdsManager = function(adContainer) {
     VAST_LINEAR_ASSET_MISMATCH: 403,
     VAST_LOAD_TIMEOUT: 301,
     VAST_MEDIA_LOAD_TIMEOUT: 402,
-    VPAID_ERROR: 901
+    VIDEO_PLAY_ERROR: 400,
+    VPAID_ERROR: 901,
   };
   // Error messages
   this.ERROR_MESSAGES = {
@@ -89,7 +97,8 @@ const AdsManager = function(adContainer) {
     VAST_LINEAR_ASSET_MISMATCH: 'Linear assets were found in the VAST ad response, but none of them matched the player\'s capabilities.', // 403
     VAST_LOAD_TIMEOUT: 'Ad request reached a timeout.', // 301
     VAST_MEDIA_LOAD_TIMEOUT: 'VAST media file loading reached a timeout of {0} seconds.', // 402
-    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for moder info.' // 901
+    VIDEO_PLAY_ERROR: 'There was an error playing the video ad.', // 400
+    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for more info.' // 901
   };
   // Errors
   this.ERRORS = {
@@ -97,7 +106,8 @@ const AdsManager = function(adContainer) {
     VAST_ASSET_NOT_FOUND: new AdError(this.ERROR_CODES.VAST_ASSET_NOT_FOUND, this.ERROR_MESSAGES.VAST_ASSET_NOT_FOUND),
     VAST_LINEAR_ASSET_MISMATCH: new AdError(this.ERROR_CODES.VAST_LINEAR_ASSET_MISMATCH, this.ERROR_MESSAGES.VAST_LINEAR_ASSET_MISMATCH),
     VAST_LOAD_TIMEOUT: new AdError(this.ERROR_CODES.VAST_LOAD_TIMEOUT, this.ERROR_MESSAGES.VAST_LOAD_TIMEOUT),
-    VAST_MEDIA_LOAD_TIMEOUT: new AdError(this.ERROR_CODES.VAST_MEDIA_LOAD_TIMEOUT, this.ERROR_MESSAGES.VAST_MEDIA_LOAD_TIMEOUT)
+    VAST_MEDIA_LOAD_TIMEOUT: new AdError(this.ERROR_CODES.VAST_MEDIA_LOAD_TIMEOUT, this.ERROR_MESSAGES.VAST_MEDIA_LOAD_TIMEOUT),
+    VIDEO_PLAY_ERROR: new AdError(this.ERROR_CODES.VIDEO_PLAY_ERROR, this.ERROR_MESSAGES.VIDEO_PLAY_ERROR)
   };
 
   this._vastClient = null;
@@ -120,6 +130,9 @@ const AdsManager = function(adContainer) {
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
 
   this._nextQuartileIndex = 0;
+
+  this._hasLoaded = false;
+  this._hasError = false;
   this._hasImpression = false;
   this._hasStarted = false;
 }
@@ -178,8 +191,8 @@ AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
   console.log('start VAST media load timeout');
   this._vastMediaLoadTimeoutId = setTimeout(() => {
-    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._attributes.loadVideoTimeout));
-  }, this._attributes.loadVideoTimeout);
+    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._options.loadVideoTimeout));
+  }, this._options.loadVideoTimeout);
 }
 AdsManager.prototype.updateVPAIDProgress = function() {
   // Check remaining time
@@ -427,6 +440,7 @@ AdsManager.prototype.onAllAdsCompleted = function() {
 }
 AdsManager.prototype.onAdError = function(message) {
   console.log('onAdError', message);
+  this._hasError = true;
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
@@ -521,30 +535,25 @@ AdsManager.prototype.processVASTResponse = function(res) {
 }
 AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
 
-  // Options
+  // Assign options
+  Object.assign(this._options, options);
+
+  // VAST options
   // timeout: Number - A custom timeout for the requests (default 120000 ms)
-  // vastLoadTimeout: Number - A custom timeout for the requests (default 23000 ms)
-  // loadVideoTimeout: Number - A custom timeout for the media load (default 8000 ms)
   // withCredentials: Boolean - A boolean to enable the withCredentials options for the XHR URLHandler (default false)
   // wrapperLimit: Number - A number of Wrapper responses that can be received with no InLine response (default 10)
   // resolveAll: Boolean - Allows you to parse all the ads contained in the VAST or to parse them ad by ad or adPod by adPod (default true)
   // allowMultipleAds: Boolean - A Boolean value that identifies whether multiple ads are allowed in the requested VAST response. This will override any value of allowMultipleAds attribute set in the VAST
   // followAdditionalWrappers: Boolean - a Boolean value that identifies whether subsequent Wrappers after a requested VAST response is allowed. This will override any value of followAdditionalWrappers attribute set in the VAST
+  const vastOptions = {
+    timeout: this._options.vastLoadTimeout,
+    withCredentials: this._options.withCredentials,
+    wrapperLimit: this._options.wrapperLimit,
+    resolveAll: this._options.resolveAll
+  };
 
-  // VAST load timeout
-  if(options.hasOwnProperty('vastLoadTimeout')) {
-    this._attributes.vastLoadTimeout = options.vastLoadTimeout;
-    options.timeout = this._attributes.vastLoadTimeout
-  } else {
-    options.timeout = this._attributes.vastLoadTimeout
-  }
-
-  // VAST media load timeout
-  if(options.hasOwnProperty('loadVideoTimeout')) {
-    this._attributes.loadVideoTimeout = options.loadVideoTimeout;
-  }
-
-  console.log('options', options);
+  console.log('options', this._options);
+  console.log('vast options', vastOptions);
 
   // Destroy
   this.destroy();
@@ -564,7 +573,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       console.log('use as URL');
       this._vastClient = new VASTClient();
       this._vastClient
-        .get(vastUrl, options)
+        .get(vastUrl, vastOptions)
         .then(res => {
           this.processVASTResponse(res);
         })
@@ -577,7 +586,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       const vastXml = (new window.DOMParser()).parseFromString(vastUrl, 'text/xml');
       this._vastParser = new VASTParser();
       this._vastParser
-        .parseVAST(vastXml, options)
+        .parseVAST(vastXml, vastOptions)
         .then(res => {
           this.processVASTResponse(res);
         })
@@ -759,7 +768,6 @@ AdsManager.prototype.isCreativeExists = function() {
 AdsManager.prototype.init = function(width, height, viewMode) {
   console.log('init > ad', width, height, viewMode, this.isCreativeExists());
 
-  var that = this;
   if(this.isCreativeExists()) {
 
     // Find the best resolution for mediaFile
@@ -799,107 +807,126 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         console.log('ad is VPAID -> inject VPAID javascript of ad and validate for existing VPAID api functionality, the dispatch AdLoaded or AdError');
         this.loadCreativeAsset(this._mediaFile.fileURL);
       } else {
-        // regular
-        console.log('regular > set video slot src >', this._mediaFile.fileURL);
-        this._videoSlot.setAttribute('src', this._mediaFile.fileURL);
+
+        // Regular
 
         // Events
-        this._slot.addEventListener('click', function() {
+        this._slot.addEventListener('click', () => {
           console.log('click');
-          if(!that._isVPAID && that._vastTracker) {
-            that._vastTracker.click();
+          if(!this._isVPAID && this._vastTracker) {
+            this._vastTracker.click();
           }
         }, false);
-        this._videoSlot.addEventListener('canplay', function() {
+
+        this._videoSlot.addEventListener('canplay', () => {
           console.log('video slot can play');
         }, false);
-        this._videoSlot.addEventListener('volumechange', function(event) {
-          that._vastTracker && that._vastTracker.setMuted(event.target.muted);
+
+        this._videoSlot.addEventListener('error', () => {
+          console.log('video slot error');
+          this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
         }, false);
-        this._videoSlot.addEventListener('timeupdate', function(event) {
-          if(that.isCreativeExists()) {
+
+        this._videoSlot.addEventListener('volumechange', (event) => {
+          this._vastTracker && this._vastTracker.setMuted(event.target.muted);
+        }, false);
+
+        this._videoSlot.addEventListener('timeupdate', (event) => {
+          if(this.isCreativeExists()) {
             const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
             if (percentPlayed >= 0) {
-              if (!that._hasImpression) {
-                that._vastTracker && that._vastTracker.trackImpression();
-                that._hasImpression = true;
+              if (!this._hasImpression) {
+                this._vastTracker && this._vastTracker.trackImpression();
+                this._hasImpression = true;
               }
             }
-            that._vastTracker && that._vastTracker.setProgress(event.target.currentTime);
+            this._vastTracker && this._vastTracker.setProgress(event.target.currentTime);
             if (event.target.duration > 0) {
-              that._attributes.remainingTime = event.target.duration - event.target.currentTime;
+              this._attributes.remainingTime = event.target.duration - event.target.currentTime;
             }
           }
         }, true);
-        this._videoSlot.addEventListener('loadedmetadata', function(event) {
+
+        this._videoSlot.addEventListener('loadedmetadata', (event) => {
           console.log('LOADED META DATA', event.target.duration);
-          that._attributes.duration = event.target.duration;
+          this._attributes.duration = event.target.duration;
           // Update tracking duration with real media meta data
-          that._vastTracker && that._vastTracker.setDuration(event.target.duration);
-          if(!that._isVPAID) {
-            that.onAdDurationChange();
+          this._vastTracker && this._vastTracker.setDuration(event.target.duration);
+          if(!this._isVPAID) {
+            this.onAdDurationChange();
           }
         }, false);
-        this._videoSlot.addEventListener('ended', function() {
+
+        this._videoSlot.addEventListener('ended', () => {
           // Complete
           console.log('video > ended');
-          that._vastTracker && that._vastTracker.complete();
+          this._vastTracker && this._vastTracker.complete();
         }, false);
 
+        console.log('regular > set video slot src >', this._mediaFile.fileURL);
+        this._videoSlot.setAttribute('src', this._mediaFile.fileURL);
 
+        // Ad Loaded
         this.onAdLoaded();
       }
 
       // Tracking
       if(this._vastTracker) {
 
-        this._vastTracker.on('clickthrough', function (url) {
+        this._vastTracker.on('clickthrough', (url) => {
           console.log('click', url);
-          if (!that._isVPAID) {
-            that.onAdClickThru(url);
+          if (!this._isVPAID) {
+            this.onAdClickThru(url);
           }
           console.log('open window', url);
           // Open the resolved clickThrough url
           const opener = window.open(url, '_blank');
           void 0 !== opener ? opener.focus() : window.location.href = url;
         });
+
         this._vastTracker.on('creativeView', () => {
           console.log('creativeView -> impression');
-          if (!that._isVPAID) {
-            that.onAdImpression();
+          if (!this._isVPAID) {
+            this.onAdImpression();
           }
         });
+
         this._vastTracker.on('start', () => {
           console.log('start');
-          if (!that._isVPAID) {
-            that.onAdVideoStart();
+          if (!this._isVPAID) {
+            this.onAdVideoStart();
           }
         });
+
         this._vastTracker.on('firstQuartile', () => {
           console.log('firstQuartile');
-          if (!that._isVPAID) {
-            that.onAdVideoFirstQuartile();
+          if (!this._isVPAID) {
+            this.onAdVideoFirstQuartile();
           }
         });
+
         this._vastTracker.on('midpoint', () => {
           console.log('midpoint');
-          if (!that._isVPAID) {
-            that.onAdVideoMidpoint();
+          if (!this._isVPAID) {
+            this.onAdVideoMidpoint();
           }
         });
+
         this._vastTracker.on('thirdQuartile', () => {
           console.log('thirdQuartile');
-          if (!that._isVPAID) {
-            that.onAdVideoThirdQuartile();
+          if (!this._isVPAID) {
+            this.onAdVideoThirdQuartile();
           }
         });
+
         this._vastTracker.on('complete', () => {
           console.log('complete');
-          if (!that._isVPAID) {
-            that.onAdVideoComplete();
-            that.onAdStopped();
+          if (!this._isVPAID) {
+            this.onAdVideoComplete();
+            this.onAdStopped();
           }
         });
+
       }
 
     } else {
@@ -913,8 +940,9 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 AdsManager.prototype.start = function() {
 
   console.log('start > ad');
+
   if(this.isCreativeExists()) {
-    this._videoSlot.muted = true;
+    this._videoSlot.muted = this._options.muted;
 
     if (this._isVPAID) {
       console.log('start > vpaid', this._isVPAID, this._vpaidCreative);
@@ -926,6 +954,7 @@ AdsManager.prototype.start = function() {
       this._videoSlot.play();
 
       this.onAdStarted();
+
     }
   }
 }
@@ -1024,12 +1053,16 @@ AdsManager.prototype.getRemainingTime = function() {
 }
 AdsManager.prototype.collapse = function() {
   if(this.isCreativeExists()) {
-    // TODO:
+    if(this._isVPAID) {
+      this._isCreativeFunctionInvokable('collapseAd') && this._vpaidCreative.collapseAd();
+    }
   }
 }
 AdsManager.prototype.expand = function() {
   if(this.isCreativeExists()) {
-    // TODO:
+    if(this._isVPAID) {
+      this._isCreativeFunctionInvokable('expandAd') && this._vpaidCreative.expandAd();
+    }
   }
 }
 AdsManager.prototype.destroy = function() {
@@ -1052,6 +1085,8 @@ AdsManager.prototype.destroy = function() {
   // Reset global variables to default values
   this._isVPAID = false;
 
+  this._hasLoaded = false;
+  this._hasError = false;
   this._hasImpression = false;
   this._hasStarted = false;
 
