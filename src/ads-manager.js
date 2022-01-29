@@ -523,8 +523,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
           this.onAdError(this.ERRORS.VAST_ASSET_NOT_FOUND);
         }
       } else {
-        // Not Linear
-        console.log('not linear');
+        // Non Linear
+        console.log('non linear');
       }
     }
 
