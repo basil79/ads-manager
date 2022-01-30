@@ -13,10 +13,10 @@ This SDK supports:
 - Wrapper
 - Tracker for VAST tracking events
 - Media Types (Assets):
-  - video/mp4; codecs=“avc1.42E01E, mp4a.40.2”
-  - video/webm; codecs=“vp8, vorbis”
-  - video/ogg; codecs=“theora, vorbis”
-  - video/3gpp; codecs=“mp4v.20.8, samr” (Safari)
+  - `video/mp4; codecs=“avc1.42E01E, mp4a.40.2”`
+  - `video/webm; codecs=“vp8, vorbis”`
+  - `video/ogg; codecs=“theora, vorbis”`
+  - `video/3gpp; codecs=“mp4v.20.8, samr”` (Safari)
 - VPAID 2.0
 
 This README is for developers who want to use and/or contribute to ads-manager.
