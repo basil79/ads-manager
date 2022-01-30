@@ -133,7 +133,7 @@ For the full documentation:
 
 A pre-bundled version of ads-manager is available: [`ads-manager.js`](dist/ads-manager.js) [minified].
 
-You can add the script directly to your page and access the library's components through the `ssp4.tv` object.
+You can add the script directly to your page and access the library's components through the `adserve.tv` object.
 
 ```html
 <script src="ads-manager.js"></script>
@@ -143,7 +143,7 @@ You can add the script directly to your page and access the library's components
 // Get your HTML element for ad container
 let adContainer = document.getElementById('ad-container');
 // Define ads manager and pass ad container
-const adsManager = new ssp4.tv.AdsManager(adContainer);
+const adsManager = new adserve.tv.AdsManager(adContainer);
 ```
 
 ## Install
