@@ -167,6 +167,14 @@ Set the volume for the current ad.
 
 - **`volume: Number`** - The volume to set, from `0` (muted) to `1` (loudest).
 
+### getVersion(): String
+
+Get the version of `AdsManager`.
+
+#### Returns
+
+- **`String`** - The current version of `AdsManager`
+
 ### destroy()
 
 Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion and stops the ad and all tracking.

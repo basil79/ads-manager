@@ -42,6 +42,8 @@
     var adContainer = document.getElementById('ad-container');
     var adsManager = new ssp4.tv.AdsManager(adContainer);
 
+    console.log('AdsManager version is', adsManager.getVersion());
+
     var isAdPaused = false;
 
     // Subscribe for events

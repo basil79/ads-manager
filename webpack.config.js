@@ -29,5 +29,17 @@ module.exports = function(env, args) {
         },
       })],
     },
+    module: {
+      rules: [{
+        test: /\.js$/,
+        loader: 'string-replace-loader',
+        options: {
+          multiple: [{
+            search: '!!#Version#!!',
+            replace: `${version}`
+          }]
+        }
+      }]
+    }
   }
 }
