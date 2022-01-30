@@ -6,14 +6,25 @@
 
 > HTML5 Video Ads Manager based on @dailymotion/vast-client
 
+This SDK supports:
+
+- VAST versions 2.0, 3.0 and 4.0+ up to 4.2 (included) - Complies with the VAST 4.2 specification provided by the Interactive Advertising Bureau (IAB).
+- Inline Linear
+- Wrapper
+- Tracker for VAST tracking events
+- Media Types (Assets):
+  - video/mp4; codecs=“avc1.42E01E, mp4a.40.2”
+  - video/webm; codecs=“vp8, vorbis”
+  - video/ogg; codecs=“theora, vorbis”
+  - video/3gpp; codecs=“mp4v.20.8, samr” (Safari)
+- VPAID 2.0
+
 This README is for developers who want to use and/or contribute to ads-manager.
 
 **Table of Contents**
 
 - [Usage](#Usage)
-  - [Constructor](#constructor)
-  - [Methods](#public-methods)
-    - [requestAds](#requestadsvasturl-options)
+- [Documentation](#Documentation)
 - [Install](#Install)
 - [Build](#Build)
 - [Run](#Run)
@@ -110,91 +121,11 @@ adsManager.requestAds(vastXML);
  */
 ```
 
-### Constructor
+## Documentation
 
-The constructor signature is:
+For the full documentation:
 
-```Javascript
-constructor(adContainer)
-```
-
-#### Parameters
-
-- **`adContainer: HTMLElement`** - (required) HTML element of the ad container
-
-#### Example
-
-```Javascript
-import { AdsManager } from 'ads-manager';
-
-const adContainer = document.getElementById('ad-container');
-// Define ads manager
-const adsManager = new AdsManager(adContainer);
-```
-
-### Public Methods
-
-### addEventListener(eventName, callback)
-
-### removeEventListener(eventName)
-
-### requestAds(vastUrl, options)
-
-#### Parameters
-
-- **`vastUrl: String`** - The url of the VAST tag, or VAST XML
-- **`options: Object`** - An optional Object to configure the ad request
-  - **`vastLoadTimeout: Number`** - VAST document load timeout (default `23000 ms`)
-  - **`loadVideoTimeout: Number`** - VAST media file (assets) load timeout (default `8000 ms`)
-  - **`withCredentials: Boolean`** - A boolean to enable the withCredentials options for the XHR URLHandler (default `false`)
-  - **`wrapperLimit: Number`** - A number of Wrapper responses that can be received with no InLine response (default `10`)
-
-#### Example
-
-```Javascript
-import { AdsManager } from 'ads-manager';
-
-const adContainer = document.getElementById('ad-container');
-const adsManager = new AdsManager(adContainer);
-// ...
-let vastUrl = 'http://v.ssp4.tv/pg/vast.xml';
-// Request ads without options
-adsManager.requestAds(vastUrl);
-// ...
-// Request ads with options
-adsManager.requestAds(vastUrl, {
-  loadVideoTimeout: 18000,
-  wrapperLimit: 7
-});
-```
-
-### init(width, height, viewMode)
-
-### start()
-
-### pause()
-
-### resume()
-
-### stop()
-
-### skip()
-
-### resize(with, height, viewMode)
-
-### getDuration(): Number
-
-### getVolume(): Number
-
-### setVolume(value)
-
-### getRemainingTime(): Number
-
-### collapse()
-
-### expand()
-
-### destroy()
+* [AdsManager](docs/ADSMANAGER.md)
 
 ### Pre-bundled versions
 
