@@ -8,7 +8,7 @@
 
 This SDK supports:
 
-- VAST versions 2.0, 3.0 and 4.0+ up to 4.2 (included) - Complies with the VAST 4.2 specification provided by the Interactive Advertising Bureau (IAB).
+- VAST versions 2.0, 3.0 and 4.0+ up to 4.2 (included) - Complies with the [VAST 4.2 specification](https://iabtechlab.com/wp-content/uploads/2019/06/VAST_4.2_final_june26.pdf) provided by the [Interactive Advertising Bureau (IAB)](https://www.iab.com/).
 - Inline Linear
 - Wrapper
 - Tracker for VAST tracking events
