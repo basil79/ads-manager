@@ -4,6 +4,7 @@
 
 - [Constructor](#constructor)
 - [Methods](#public-methods)
+  - [getVersion](#getversion-string)
   - [addEventListener](#addeventlistenereventname-callback)
   - [removeEventListener](#removeeventlistenereventname)
   - [requestAds](#requestadsvasturl-options)
@@ -45,6 +46,14 @@ const adsManager = new AdsManager(adContainer);
 ```
 
 ## Public Methods
+
+### getVersion(): String
+
+Get the version of `AdsManager`.
+
+#### Returns
+
+- **`String`** - The current version of `AdsManager`.
 
 ### addEventListener(eventName, callback)
 
@@ -166,14 +175,6 @@ Set the volume for the current ad.
 #### Parameter
 
 - **`volume: Number`** - The volume to set, from `0` (muted) to `1` (loudest).
-
-### getVersion(): String
-
-Get the version of `AdsManager`.
-
-#### Returns
-
-- **`String`** - The current version of `AdsManager`
 
 ### destroy()
 
