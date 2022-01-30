@@ -17,7 +17,7 @@ This SDK supports:
   - `video/webm; codecs=“vp8, vorbis”`
   - `video/ogg; codecs=“theora, vorbis”`
   - `video/3gpp; codecs=“mp4v.20.8, samr”` (Safari)
-- VPAID 2.0
+- [VPAID 2.0](https://iabtechlab.com/wp-content/uploads/2016/04/VPAID_2_0_Final_04-10-2012.pdf)
 
 This README is for developers who want to use and/or contribute to ads-manager.
 
