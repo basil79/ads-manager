@@ -60,7 +60,8 @@ const AdsManager = function(adContainer) {
     duration: 10,
     remainingTime: 10,
     currentTime: 0,
-    volume: 0
+    volume: 0,
+    version: '!!#Version#!!'
   };
   // Options
   this._options = {
@@ -1100,6 +1101,9 @@ AdsManager.prototype.destroy = function() {
   console.log('remove slot');
   this.removeSlot();
 
+}
+AdsManager.prototype.getVersion = function() {
+  return this._attributes.version;
 }
 
 export { AdsManager }
