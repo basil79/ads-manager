@@ -727,7 +727,8 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
     iframe = document.createElement('iframe');
 
   iframe.id = 'vpaidIframe';
-  vpaidIframe == null ? document.body.appendChild(iframe) : document.body.replaceChild(iframe, vpaidIframe); // this._adContainer.appendChild(iframe) : this._adContainer.replaceChild(iframe, vpaidIframe);
+  //vpaidIframe == null ? document.body.appendChild(iframe) : document.body.replaceChild(iframe, vpaidIframe);
+  vpaidIframe == null ? this._adContainer.appendChild(iframe) : this._adContainer.replaceChild(iframe, vpaidIframe);
   iframe.width = 0;
   iframe.height = 0;
   iframe.style.display = 'none';
