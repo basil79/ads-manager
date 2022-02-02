@@ -471,6 +471,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
 
     if(ads.length > 1) {
       // Ad pod
+      // Filter by sequence
       this._adPod = ads.sort(function(a, b) {
         let aSequence = a.sequence;
         let bSequence = b.sequence;
@@ -485,7 +486,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
         }
       });
       console.log(this._adPod);
-      // Filter by sequence
+
       this._ad = ads[0];
       console.log(this._ad);
     } else {
