@@ -116,6 +116,7 @@ const AdsManager = function(adContainer) {
   this._vastTracker = null;
 
   this._ad = null;
+  this._adPod = null;
   this._creative = null;
   this._mediaFiles = null;
   this._mediaFileIndex = 0;
@@ -467,16 +468,21 @@ AdsManager.prototype.processVASTResponse = function(res) {
   const ads = res.ads;
   if(ads.length != 0) {
     console.log('ads length', ads.length);
+
     if(ads.length > 1) {
       // Ad pod
-      console.log('AdsManagerLoaded > ad pod');
-      // TODO:
-      this.onAdsManagerLoaded();
+      this._adPod = ads;
+      // Filter by sequence
+      this._ad = ads.filter(ad => ad.sequence != null)[0];
+      console.log(this._ad);
     } else {
-      // Ad
+      // Get first
       console.log(this._videoSlot, ads[0]);
-
       this._ad = ads[0];
+    }
+
+    if(this._ad) {
+
       // Filter linear creatives, get first
       this._creative = ads[0].creatives.filter(creative => creative.type === 'linear')[0];
       // Check if creative has media files
@@ -527,6 +533,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
         // Non Linear
         console.log('non linear');
       }
+
     }
 
   } else {
