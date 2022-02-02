@@ -471,12 +471,25 @@ AdsManager.prototype.processVASTResponse = function(res) {
 
     if(ads.length > 1) {
       // Ad pod
-      this._adPod = ads;
+      this._adPod = ads.sort(function(a, b) {
+        let aSequence = a.sequence;
+        let bSequence = b.sequence;
+        if (aSequence === bSequence) {
+          return 0;
+        } else if (aSequence === null) {
+          return 1;
+        } else if (bSequence === null) {
+          return -1;
+        } else {
+          return (aSequence < bSequence) ? -1 : (aSequence > bSequence) ? 1 : 0;
+        }
+      });
+      console.log(this._adPod);
       // Filter by sequence
-      this._ad = ads.filter(ad => ad.sequence != null)[0];
+      this._ad = ads[0];
       console.log(this._ad);
     } else {
-      // Get first
+      // Ad
       console.log(this._videoSlot, ads[0]);
       this._ad = ads[0];
     }
