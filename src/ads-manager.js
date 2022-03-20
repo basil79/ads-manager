@@ -824,6 +824,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       // Resize slot
       this.resizeSlot(this._attributes.width, this._attributes.height);
 
+      this._videoSlot.addEventListener('error', () => {
+        console.log('video slot error');
+        this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
+      }, false);
+
       if(this._isVPAID) {
         // VPAID
         console.log('vpaid >>>>>>>>>>>>>> todo', this._mediaFile.fileURL);
@@ -843,11 +848,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
         this._videoSlot.addEventListener('canplay', () => {
           console.log('video slot can play');
-        }, false);
-
-        this._videoSlot.addEventListener('error', () => {
-          console.log('video slot error');
-          this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
         }, false);
 
         this._videoSlot.addEventListener('volumechange', (event) => {
