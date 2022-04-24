@@ -96,7 +96,12 @@
     adsManager.addEventListener('AdStarted', function() {
         console.log('AdStarted');
         appendEvent('AdStarted');
-        videoElement.pause();
+
+        // Pause
+        if(!videoElement.paused) {
+          videoElement.pause();
+        }
+
         enableAdButtons();
     });
     adsManager.addEventListener('AdDurationChange', function() {
@@ -109,8 +114,8 @@
         appendEvent('AdSizeChange');
     });
     adsManager.addEventListener('AdVideoStart', function() {
-        console.log('AdVideoStart');
-        appendEvent('AdVideoStart');
+      console.log('AdVideoStart');
+      appendEvent('AdVideoStart');
     });
     adsManager.addEventListener('AdImpression', function() {
         console.log('AdImpression');
@@ -141,12 +146,12 @@
         appendEvent('AdPlaying');
     });
     adsManager.addEventListener('AdVideoComplete', function () {
-        console.log('AdVideoComplete');
-        appendEvent('AdVideoComplete');
+      console.log('AdVideoComplete');
+      appendEvent('AdVideoComplete');
     });
     adsManager.addEventListener('AdStopped', function () {
-        console.log('AdStopped');
-        appendEvent('AdStopped');
+      console.log('AdStopped');
+      appendEvent('AdStopped');
     });
     adsManager.addEventListener('AdSkipped', function() {
         console.log('AdSkipped');
@@ -157,11 +162,16 @@
         appendEvent('AdClickThru');
     });
     adsManager.addEventListener('AllAdsCompleted', function () {
-        console.log('AllAdsCompleted');
-        appendEvent('AllAdsCompleted');
-        isAdPaused = false;
+      console.log('AllAdsCompleted');
+      appendEvent('AllAdsCompleted');
+      isAdPaused = false;
+
+      // Resume player
+      if(!videoElement.ended) {
         videoElement.play();
-        disableAdButtons();
+      }
+
+      disableAdButtons();
     });
 
     // Ad Request

@@ -52,6 +52,7 @@ const AdsManager = function(adContainer) {
   this._eventCallbacks = {};
   this._creativeEventCallbacks = {};
 
+  // Attributes
   this._attributes = {
     width: 300,
     height: 154,
@@ -63,6 +64,25 @@ const AdsManager = function(adContainer) {
     volume: 0,
     version: '!!#Version#!!'
   };
+
+  // Quartile Events
+  this._quartileEvents = [
+    { event: 'AdImpression', value: 0 }, { event: 'AdVideoStart', value: 0 },
+    { event: 'AdVideoFirstQuartile', value: 25 },
+    { event: 'AdVideoMidpoint', value: 50 },
+    { event: 'AdVideoThirdQuartile', value: 75 },
+    { event: 'AdVideoComplete', value: 100 }
+  ];
+  this._nextQuartileIndex = 0;
+  this._defaultEventCallbacks = {
+    'AdImpression': this.onAdImpression.bind(this),
+    'AdVideoStart': this.onAdVideoStart.bind(this),
+    'AdVideoFirstQuartile': this.onAdVideoFirstQuartile.bind(this),
+    'AdVideoMidpoint': this.onAdVideoMidpoint.bind(this),
+    'AdVideoThirdQuartile': this.onAdVideoThirdQuartile.bind(this),
+    'AdVideoComplete': this.onAdVideoComplete.bind(this)
+  };
+
   // Options
   this._options = {
     autoplay: true,
@@ -130,8 +150,6 @@ const AdsManager = function(adContainer) {
   this._vpaidProgressCounter = null;
 
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
-
-  this._nextQuartileIndex = 0;
 
   this._hasLoaded = false;
   this._hasError = false;
@@ -836,7 +854,8 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         this.loadCreativeAsset(this._mediaFile.fileURL);
       } else {
 
-        // Regular
+        // VAST
+        console.log('VAST');
 
         // Events
         this._slot.addEventListener('click', () => {
@@ -844,19 +863,30 @@ AdsManager.prototype.init = function(width, height, viewMode) {
           if(!this._isVPAID && this._vastTracker) {
             this._vastTracker.click();
           }
-        }, false);
+        });
 
         this._videoSlot.addEventListener('canplay', () => {
           console.log('video slot can play');
-        }, false);
+        });
 
         this._videoSlot.addEventListener('volumechange', (event) => {
           this._vastTracker && this._vastTracker.setMuted(event.target.muted);
-        }, false);
+        });
 
         this._videoSlot.addEventListener('timeupdate', (event) => {
           if(this.isCreativeExists()) {
+
+            if (this._nextQuartileIndex >= this._quartileEvents.length) {
+              return;
+            }
+
             const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
+            if (percentPlayed >= this._quartileEvents[this._nextQuartileIndex].value) {
+              const lastQuartileEvent = this._quartileEvents[this._nextQuartileIndex].event;
+              this._defaultEventCallbacks[lastQuartileEvent]();
+              this._nextQuartileIndex += 1;
+            }
+
             if (percentPlayed >= 0) {
               if (!this._hasImpression) {
                 this._vastTracker && this._vastTracker.trackImpression();
@@ -875,16 +905,21 @@ AdsManager.prototype.init = function(width, height, viewMode) {
           this._attributes.duration = event.target.duration;
           // Update tracking duration with real media meta data
           this._vastTracker && this._vastTracker.setDuration(event.target.duration);
-          if(!this._isVPAID) {
+          //if(!this._isVPAID) {
             this.onAdDurationChange();
-          }
-        }, false);
+          //}
+        });
 
         this._videoSlot.addEventListener('ended', () => {
           // Complete
           console.log('video > ended');
           this._vastTracker && this._vastTracker.complete();
-        }, false);
+
+          //setTimeout(() => {
+            this.onAdStopped();
+          //}, 75);
+
+        });
 
         console.log('regular > set video slot src >', this._mediaFile.fileURL);
         this._videoSlot.setAttribute('src', this._mediaFile.fileURL);
@@ -907,48 +942,50 @@ AdsManager.prototype.init = function(width, height, viewMode) {
           void 0 !== opener ? opener.focus() : window.location.href = url;
         });
 
+        /*
         this._vastTracker.on('creativeView', () => {
           console.log('creativeView -> impression');
           if (!this._isVPAID) {
-            this.onAdImpression();
+            //this.onAdImpression();
           }
         });
 
         this._vastTracker.on('start', () => {
           console.log('start');
           if (!this._isVPAID) {
-            this.onAdVideoStart();
+            //this.onAdVideoStart();
           }
         });
 
         this._vastTracker.on('firstQuartile', () => {
           console.log('firstQuartile');
           if (!this._isVPAID) {
-            this.onAdVideoFirstQuartile();
+            //this.onAdVideoFirstQuartile();
           }
         });
 
         this._vastTracker.on('midpoint', () => {
           console.log('midpoint');
           if (!this._isVPAID) {
-            this.onAdVideoMidpoint();
+            //this.onAdVideoMidpoint();
           }
         });
 
         this._vastTracker.on('thirdQuartile', () => {
           console.log('thirdQuartile');
           if (!this._isVPAID) {
-            this.onAdVideoThirdQuartile();
+            //this.onAdVideoThirdQuartile();
           }
         });
 
         this._vastTracker.on('complete', () => {
           console.log('complete');
           if (!this._isVPAID) {
-            this.onAdVideoComplete();
-            this.onAdStopped();
+            //this.onAdVideoComplete();
+            //this.onAdStopped();
           }
         });
+        */
 
       }
 
@@ -1106,6 +1143,8 @@ AdsManager.prototype.destroy = function() {
   }
 
   // Reset global variables to default values
+  this._nextQuartileIndex = 0;
+
   this._isVPAID = false;
 
   this._hasLoaded = false;
