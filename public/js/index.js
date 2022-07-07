@@ -35,6 +35,9 @@
         eventItem.innerHTML = time + ' ' + text;
         eventsList.appendChild(eventItem);
     }
+    function clearEvents() {
+        eventsList.innerHTML = '';
+    }
 
     // Example
     var videoElement = document.getElementById('video-element');
@@ -233,8 +236,12 @@
 
     testAdButton.addEventListener('click', function() {
         console.log('test button click');
-        var eventsList = document.getElementById('events-list');
-        eventsList.innerHTML = '';
+
+        isAdPaused = false;
+        pauseAdButton.innerHTML = 'Pause Ad';
+
+        // Clear events
+        clearEvents();
 
         var giveVastUrl = document.getElementById('vast-url-input').value;
 
@@ -270,8 +277,8 @@
         adsManager.resize(width, height, viewMode);
     }, false);
     clearLogsButton.addEventListener('click', function() {
-        var eventsList = document.getElementById('events-list');
-        eventsList.innerHTML = '';
+        // Clear events
+        clearEvents();
     }, false);
 
 })()
