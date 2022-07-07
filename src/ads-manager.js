@@ -499,9 +499,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
           return 1;
         } else if (bSequence === null) {
           return -1;
-        } else {
-          return (aSequence < bSequence) ? -1 : (aSequence > bSequence) ? 1 : 0;
         }
+        return (aSequence < bSequence) ? -1 : (aSequence > bSequence) ? 1 : 0;
       });
       console.log(this._adPod);
 
@@ -562,6 +561,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
           this.onAdError(this.ERRORS.VAST_ASSET_NOT_FOUND);
         }
       } else {
+        // TODO:
         // Non Linear
         console.log('non linear');
       }
@@ -678,15 +678,16 @@ AdsManager.prototype._isCreativeFunctionInvokable = function(a) {
   return this._vpaidCreative ? (a = this._vpaidCreative[a]) && typeof a === 'function' : false;
 }
 AdsManager.prototype.checkVPAIDInterface = function(a) {
-  for (var b = { passed: true, missingInterfaces: ''}, d = a.length - 1; 0 <= d; d--)
+  const b = { passed: true, missingInterfaces: ''};
+  for (let d = a.length - 1; 0 <= d; d--)
     this._isCreativeFunctionInvokable(a[d]) || (b.passed = false, b.missingInterfaces += a[d] + ' ');
   return b;
 }
 AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context) {
-  for (var event in eventCallbacks) eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.subscribe(eventCallbacks[event], event, context)
+  for (const event in eventCallbacks) eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.subscribe(eventCallbacks[event], event, context)
 }
 AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
-  for (var event in eventCallbacks) {
+  for (const event in eventCallbacks) {
     console.log('removeCallback', event);
     eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
   }
@@ -695,18 +696,19 @@ AdsManager.prototype.creativeAssetLoaded = function() {
   console.log('creative asset loaded');
   console.log(this._vpaidCreative);
   console.log('check VPAID creative');
-  var that = this,
-    checkVPAIDMinVersion = function() {
-      console.log('check VPAID min version');
-      var c = that.handshakeVersion(that.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1));
-      console.log('VPAID min version is', c);
-      return c ? parseFloat(c) < that.SUPPORTED_CREATIVE_VPAID_VERSION_MIN ? (that.onAdError('Only support creatives with VPAID version >= ' + that.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1)), !1) : !0 : (that.onAdError('Cannot get VPAID version from the creative'), !1)
-    };
-  if (function() {
-    var c = that.checkVPAIDInterface('handshakeVersion initAd startAd stopAd subscribe unsubscribe getAdLinear'.split(' '));
+
+  const checkVPAIDMinVersion = () => {
+    console.log('check VPAID min version');
+    const c = this.handshakeVersion(this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1));
+    console.log('VPAID min version is', c);
+    return c ? parseFloat(c) < this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN ? (this.onAdError('Only support creatives with VPAID version >= ' + this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1)), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
+  };
+  if (function(that) {
+    const c = that.checkVPAIDInterface('handshakeVersion initAd startAd stopAd subscribe unsubscribe getAdLinear'.split(' '));
+    console.log('interface', c);
     c.passed || that.onAdError('Missing interfaces in the VPAID creative: ' + c.missingInterfaces);
     return c.passed
-  }() && checkVPAIDMinVersion()) {
+  }(this) && checkVPAIDMinVersion()) {
 
     console.log('VPAID is OK');
     // VPAID events
@@ -867,6 +869,10 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
         this._videoSlot.addEventListener('canplay', () => {
           console.log('video slot can play');
+        });
+
+        this._videoSlot.addEventListener('play', () => {
+          console.log('video slot play');
         });
 
         this._videoSlot.addEventListener('volumechange', (event) => {
