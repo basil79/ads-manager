@@ -72,30 +72,6 @@ module.exports = function(env, args) {
       })],
     },
     module: module
-  },{
-    entry : './src/ads-manager.js',
-    output : {
-      path: __dirname + '/dist',
-      filename : 'ads-manager.cjs.js',
-      library: {
-        type: 'commonjs'
-      }
-    },
-    plugins: plugins,
-    optimization: {
-      minimize: true,
-      minimizer: [new TerserPlugin({
-        parallel: 4,
-        extractComments: true,
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            ecma: 2015
-          }
-        },
-      })],
-    },
-    module: module
   });
 
   return outputs;
