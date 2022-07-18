@@ -8,7 +8,7 @@
   "engines": {
     "node": ">=12.22.1"
   },
-  "browser": "./dist/ads-manager.es.js",
+  "main": "./dist/ads-manager.es.js",
   "scripts": {
     "contBuild": "watch \"npm run build:dev\" src",
     "devServer": "npm-run-all -p testServer contBuild",
@@ -42,7 +42,7 @@
   "author": "Basil Goldman",
   "license": "Apache-2.0",
   "dependencies": {
-    "@dailymotion/vast-client": "^3.3.0"
+    "@dailymotion/vast-client": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
