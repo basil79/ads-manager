@@ -142,7 +142,7 @@ You can add the script directly to your page and access the library's components
 
 ```javascript
 // Get your HTML element for ad container
-let adContainer = document.getElementById('ad-container');
+const adContainer = document.getElementById('ad-container');
 // Define ads manager and pass ad container
 const adsManager = new adserve.tv.AdsManager(adContainer);
 ```
