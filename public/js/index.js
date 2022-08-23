@@ -1,4 +1,4 @@
-(function() {
+//(function() {
 
     // var playButton = document.getElementById('play-button');
     var testAdButton = document.getElementById('test-ad-button');
@@ -55,7 +55,9 @@
         appendEvent('AdError : ' + adError);
 
         if(adsManager) {
-            adsManager.destroy();
+          // abort anything that currenlty doing on with AdsManager
+          // and reset to a default state
+          adsManager.abort();
         }
 
         isAdPaused = false;
@@ -281,4 +283,4 @@
         clearEvents();
     }, false);
 
-})()
+//})()

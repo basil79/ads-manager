@@ -60,7 +60,9 @@ adsManager.addEventListener('AdsManagerLoaded', function() {
 // AdError
 adsManager.addEventListener('AdError', function(adError) {
   if(adsManager) {
-    adsManager.destroy();
+    // abort anything that currenlty doing on with AdsManager
+    // and reset to a default state
+    adsManager.abort();
   }
   // ... 
 });
