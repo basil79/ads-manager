@@ -155,6 +155,8 @@ const AdsManager = function(adContainer) {
   this._hasError = false;
   this._hasImpression = false;
   this._hasStarted = false;
+
+  this._isDestroyed = false;
 }
 AdsManager.prototype.createSlot = function() {
   this._slot = document.createElement('div');
@@ -164,11 +166,10 @@ AdsManager.prototype.createSlot = function() {
   this.createVideoSlot();
 }
 AdsManager.prototype.removeSlot = function() {
-  this._slot.parentNode.removeChild(this._slot);
-  this.createSlot();
+  this._slot.parentNode && this._slot.parentNode.removeChild(this._slot);
+  //this.createSlot();
 }
 AdsManager.prototype.showSlot = function() {
-  console.log('show slot');
   // Check if video slot has src, if no then hide video slot
   if(this._videoSlot.src === '') {
     this.hideVideoSlot();
@@ -194,14 +195,7 @@ AdsManager.prototype.createVideoSlot = function() {
 AdsManager.prototype.hideVideoSlot = function() {
   this._videoSlot.style.display = 'none';
 }
-/*
-AdsManager.prototype.removeVideoSlot = function() {
-    this._videoSlot.parentNode.removeChild(this._videoSlot);
-    this.createVideoSlot();
-}
- */
 AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
-  console.log('stop VAST media load timeout');
   if(this._vastMediaLoadTimeoutId) {
     clearTimeout(this._vastMediaLoadTimeoutId);
     this._vastMediaLoadTimeoutId = null;
@@ -209,7 +203,6 @@ AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
 }
 AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
-  console.log('start VAST media load timeout');
   this._vastMediaLoadTimeoutId = setTimeout(() => {
     this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._options.loadVideoTimeout));
   }, this._options.loadVideoTimeout);
@@ -217,7 +210,6 @@ AdsManager.prototype.startVASTMediaLoadTimeout = function() {
 AdsManager.prototype.updateVPAIDProgress = function() {
   // Check remaining time
   this._attributes.remainingTime = this._isCreativeFunctionInvokable('getAdRemainingTime') ? this._vpaidCreative.getAdRemainingTime() : -1;
-  console.log('getAdRemainingTime', this._attributes.remainingTime);
   if(!isNaN(this._attributes.remainingTime) && this._attributes.remainingTime !== 1) {
     this._attributes.currentTime = this._attributes.duration - this._attributes.remainingTime;
     // Track progress
@@ -226,33 +218,33 @@ AdsManager.prototype.updateVPAIDProgress = function() {
 }
 AdsManager.prototype.startVPAIDProgress = function() {
   this.stopVPAIDProgress();
-  console.log('start VPAID progress');
   this._vpaidProgressCounter = setInterval(() => {
     if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
       this.updateVPAIDProgress();
     } else {
-      console.log('stop VPAID progress');
       this.stopVPAIDProgress();
     }
   }, 1000);
 }
 AdsManager.prototype.stopVPAIDProgress = function() {
-  console.log('stop VPAID progress > executed');
   if(this._vpaidProgressCounter) {
     clearInterval(this._vpaidProgressCounter);
     this._vpaidProgressCounter = null;
   }
 }
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
-  console.log('subscribe for event', eventName);
   const givenCallback = callback.bind(context);
   this._eventCallbacks[eventName] = givenCallback;
 }
 AdsManager.prototype.removeEventListener = function(eventName) {
   this._eventCallbacks[eventName] = null;
 }
+AdsManager.prototype.removeEventListeners = function(eventCallbacks) {
+  for (const eventName in eventCallbacks) {
+    eventCallbacks.hasOwnProperty(eventName) && this.removeEventListener(eventName);
+  }
+}
 AdsManager.prototype.onAdsManagerLoaded = function() {
-  console.log('onAdsManagerLoaded');
   if (this.EVENTS.AdsManagerLoaded in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdsManagerLoaded] === 'function') {
       this._eventCallbacks[this.EVENTS.AdsManagerLoaded]();
@@ -260,8 +252,6 @@ AdsManager.prototype.onAdsManagerLoaded = function() {
   }
 }
 AdsManager.prototype.onAdLoaded = function() {
-  console.log('onAdLoaded', this._creative);
-  console.log('stop VAST media load timeout on AdLoaded');
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdLoaded] === 'function') {
@@ -270,10 +260,8 @@ AdsManager.prototype.onAdLoaded = function() {
   }
 }
 AdsManager.prototype.onAdDurationChange = function() {
-  console.log('onAdDurationChange');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._attributes.duration = this._isCreativeFunctionInvokable('getAdDuration') ? this._vpaidCreative.getAdDuration() : -1;
-    console.log('update tracker with new duration', this._attributes.duration);
     if(this._attributes.duration !== -1) {
       this._vastTracker.setDuration(this._attributes.duration);
     }
@@ -285,7 +273,6 @@ AdsManager.prototype.onAdDurationChange = function() {
   }
 }
 AdsManager.prototype.onAdSizeChange = function() {
-  console.log('onAdSizeChange');
   if (this.EVENTS.AdSizeChange in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdSizeChange] === 'function') {
       this._eventCallbacks[this.EVENTS.AdSizeChange]();
@@ -293,7 +280,6 @@ AdsManager.prototype.onAdSizeChange = function() {
   }
 }
 AdsManager.prototype.onAdStarted = function() {
-  console.log('onAdStarted', this._videoSlot.src);
   // Show ad slot
   this.showSlot();
 
@@ -304,7 +290,6 @@ AdsManager.prototype.onAdStarted = function() {
   }
 }
 AdsManager.prototype.onAdVideoStart = function() {
-  console.log('onAdVideoStart');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
@@ -315,27 +300,24 @@ AdsManager.prototype.onAdVideoStart = function() {
   }
 }
 AdsManager.prototype.onAdStopped = function() {
-  console.log('onAdStopped > remove ad from UI');
   if (this.EVENTS.AdStopped in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdStopped] === 'function') {
       this._eventCallbacks[this.EVENTS.AdStopped]();
     }
   }
-  // Then destroy ad, unsubscribe and e.t.c
-  this.destroyAd();
+  // abort the ad, unsubscribe and reset to a default state
+  this._abort();
 }
 AdsManager.prototype.onAdSkipped = function() {
-  console.log('onAdSkipped');
   if (this.EVENTS.AdSkipped in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdSkipped] === 'function') {
       this._eventCallbacks[this.EVENTS.AdSkipped]();
     }
   }
-  // Then destroy ad, unsubscribe and e.t.c
-  this.destroyAd();
+  // abort the ad, unsubscribe and reset to a default state
+  this._abort();
 }
 AdsManager.prototype.onAdVolumeChange = function() {
-  console.log('onAdVolumeChange');
   if (this.EVENTS.AdVolumeChange in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdVolumeChange] === 'function') {
       this._eventCallbacks[this.EVENTS.AdVolumeChange]();
@@ -343,12 +325,10 @@ AdsManager.prototype.onAdVolumeChange = function() {
   }
 }
 AdsManager.prototype.onAdImpression = function() {
-  console.log('onAdImpression');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     if (!this._hasImpression) {
       // Check duration
       this._attributes.duration = this._isCreativeFunctionInvokable('getAdDuration') ? this._vpaidCreative.getAdDuration() : -1;
-      console.log('update tracker with new duration', this._attributes.duration);
       if(this._attributes.duration !== -1) {
         this._vastTracker.setDuration(this._attributes.duration);
       }
@@ -374,7 +354,6 @@ AdsManager.prototype.onAdImpression = function() {
   }
 }
 AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
-  console.log('onAdClickThru', url, id, playerHandles);
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.click();
   }
@@ -385,7 +364,6 @@ AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
   }
 }
 AdsManager.prototype.onAdVideoFirstQuartile = function() {
-  console.log('onAdVideoFirstQuartile');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
@@ -396,7 +374,6 @@ AdsManager.prototype.onAdVideoFirstQuartile = function() {
   }
 };
 AdsManager.prototype.onAdVideoMidpoint = function() {
-  console.log('onAdVideoMidpoint');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
@@ -407,7 +384,6 @@ AdsManager.prototype.onAdVideoMidpoint = function() {
   }
 };
 AdsManager.prototype.onAdVideoThirdQuartile = function() {
-  console.log('onAdVideoThirdQuartile');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
@@ -418,7 +394,6 @@ AdsManager.prototype.onAdVideoThirdQuartile = function() {
   }
 };
 AdsManager.prototype.onAdPaused = function() {
-  console.log('onAdPaused');
   if(this._vastTracker) {
     this._vastTracker.setPaused(true);
   }
@@ -429,7 +404,6 @@ AdsManager.prototype.onAdPaused = function() {
   }
 };
 AdsManager.prototype.onAdPlaying = function() {
-  console.log('onAdPlaying');
   if(this._vastTracker) {
     this._vastTracker.setPaused(false);
   }
@@ -440,7 +414,6 @@ AdsManager.prototype.onAdPlaying = function() {
   }
 };
 AdsManager.prototype.onAdVideoComplete = function() {
-  console.log('onAdVideoComplete');
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.complete();
   }
@@ -451,7 +424,6 @@ AdsManager.prototype.onAdVideoComplete = function() {
   }
 }
 AdsManager.prototype.onAllAdsCompleted = function() {
-  console.log('onAllAdsCompleted');
   if (this.EVENTS.AllAdsCompleted in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AllAdsCompleted] === 'function') {
       this._eventCallbacks[this.EVENTS.AllAdsCompleted]();
@@ -459,7 +431,6 @@ AdsManager.prototype.onAllAdsCompleted = function() {
   }
 }
 AdsManager.prototype.onAdError = function(message) {
-  console.log('onAdError', message);
   this._hasError = true;
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
@@ -472,7 +443,6 @@ AdsManager.prototype.onAdError = function(message) {
   }
 }
 AdsManager.prototype.onAdLog = function(message) {
-  console.log('onAdLog');
   if (this.EVENTS.AdLog in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdLog] === 'function') {
       this._eventCallbacks[this.EVENTS.AdLog](message);
@@ -481,11 +451,8 @@ AdsManager.prototype.onAdLog = function(message) {
 }
 AdsManager.prototype.processVASTResponse = function(res) {
 
-  console.log('processVASTResponse', res);
-
   const ads = res.ads;
   if(ads.length != 0) {
-    console.log('ads length', ads.length);
 
     if(ads.length > 1) {
       // Ad pod
@@ -502,13 +469,10 @@ AdsManager.prototype.processVASTResponse = function(res) {
         }
         return (aSequence < bSequence) ? -1 : (aSequence > bSequence) ? 1 : 0;
       });
-      console.log(this._adPod);
 
       this._ad = ads[0];
-      console.log(this._ad);
     } else {
       // Ad
-      console.log(this._videoSlot, ads[0]);
       this._ad = ads[0];
     }
 
@@ -520,16 +484,13 @@ AdsManager.prototype.processVASTResponse = function(res) {
       if(this._creative) {
 
         if(this._creative.mediaFiles.length != 0) {
-          console.log('is linear creative ? > YES', this._creative);
           // Filter and check media files for mime type canPlay and if VPAID or not
           this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
             // mime types -> mp4, webm, ogg, 3gp
             if(this.canPlayVideoType(mediaFile.mimeType)) {
-              console.log('can play', mediaFile);
               return mediaFile;
             } else if(mediaFile.mimeType === 'application/javascript') {
               // apiFramework -> mime type -> application/javascript
-              console.log('can play -> vpaid', mediaFile);
               return mediaFile;
             }
           });//[0]; // take the first one
@@ -540,8 +501,6 @@ AdsManager.prototype.processVASTResponse = function(res) {
             let bHeight = b.height;
             return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
           });
-
-          console.log('sorted media files', this._mediaFiles);
 
           if(this._mediaFiles && this._mediaFiles.length != 0) {
             // TODO: move after adLoaded
@@ -575,6 +534,10 @@ AdsManager.prototype.processVASTResponse = function(res) {
 }
 AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
 
+  if(this._isDestroyed) {
+    return;
+  }
+
   // Assign options
   Object.assign(this._options, options);
 
@@ -592,15 +555,11 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     resolveAll: this._options.resolveAll
   };
 
-  console.log('options', this._options);
-  console.log('vast options', vastOptions);
-
-  // Destroy
-  this.destroy();
+  // Abort
+  this.abort();
 
   // Check if vastUrl exists
   if(vastUrl && typeof vastUrl === 'string') {
-    console.log('request ads', vastUrl);
 
     let isURL = false;
     try {
@@ -610,7 +569,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     }
 
     if (isURL) {
-      console.log('use as URL');
+      // use VAST URL
       this._vastClient = new VASTClient();
       this._vastClient
         .get(vastUrl, vastOptions)
@@ -618,11 +577,10 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
           this.processVASTResponse(res);
         })
         .catch(err => {
-          console.log(err);
           this.onAdError(err.message);
         });
     } else {
-      console.log('try to use as XML');
+      // use VAST XML
       const vastXml = (new window.DOMParser()).parseFromString(vastUrl, 'text/xml');
       this._vastParser = new VASTParser();
       this._vastParser
@@ -631,7 +589,6 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
           this.processVASTResponse(res);
         })
         .catch(err => {
-          console.log(err);
           this.onAdError(err.message);
         });
     }
@@ -671,7 +628,6 @@ AdsManager.prototype.supportsThreeGPVideo = function() {
   return document.createElement('video').canPlayType('video/3gpp; codecs="mp4v.20.8, samr"');
 }
 AdsManager.prototype.handshakeVersion = function(version) {
-  console.log('VPAID Creative: handshakeVersion(' + version + ')');
   return this._vpaidCreative.handshakeVersion(version);
 }
 AdsManager.prototype._isCreativeFunctionInvokable = function(a) {
@@ -688,29 +644,20 @@ AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context)
 }
 AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
   for (const event in eventCallbacks) {
-    console.log('removeCallback', event);
     eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
   }
 }
 AdsManager.prototype.creativeAssetLoaded = function() {
-  console.log('creative asset loaded');
-  console.log(this._vpaidCreative);
-  console.log('check VPAID creative');
-
   const checkVPAIDMinVersion = () => {
-    console.log('check VPAID min version');
     const c = this.handshakeVersion(this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1));
-    console.log('VPAID min version is', c);
     return c ? parseFloat(c) < this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN ? (this.onAdError('Only support creatives with VPAID version >= ' + this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1)), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
   };
   if (function(that) {
     const c = that.checkVPAIDInterface('handshakeVersion initAd startAd stopAd subscribe unsubscribe getAdLinear'.split(' '));
-    console.log('interface', c);
     c.passed || that.onAdError('Missing interfaces in the VPAID creative: ' + c.missingInterfaces);
     return c.passed
   }(this) && checkVPAIDMinVersion()) {
 
-    console.log('VPAID is OK');
     // VPAID events
     this._creativeEventCallbacks = {
       AdStarted: this.onAdStarted,
@@ -740,7 +687,6 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     }
 
     // Subscribe for VPAID events
-    console.log('subscribe for VPAID events');
     this.setCallbacksForCreative(this._creativeEventCallbacks, this);
 
     // Prepare for iniAd
@@ -755,7 +701,6 @@ AdsManager.prototype.creativeAssetLoaded = function() {
       videoSlotCanAutoPlay: true
     };
     // iniAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars)
-    console.log('vpaid initAd >', width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
     // Start loadVideoTimeout
     this.startVASTMediaLoadTimeout();
     this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
@@ -763,7 +708,6 @@ AdsManager.prototype.creativeAssetLoaded = function() {
   }
 }
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
-  console.log('load creative asset >', fileURL);
   const vpaidIframe = document.getElementById('vpaidIframe'),
     iframe = document.createElement('iframe');
 
@@ -796,11 +740,9 @@ AdsManager.prototype.removeCreativeAsset = function() {
     vpaidIframe.parentNode.removeChild(vpaidIframe);
   }
 }
-AdsManager.prototype.destroyAd = function() {
-
-  console.log('destroyAd');
-  this.destroy();
-  // TODO:
+AdsManager.prototype._abort = function() {
+  // Abort
+  this.abort();
 
   // Dispatch AllAdsCompleted
   this.onAllAdsCompleted();
@@ -809,33 +751,30 @@ AdsManager.prototype.isCreativeExists = function() {
   return this._creative && this._creative.mediaFiles.length != 0;
 }
 AdsManager.prototype.init = function(width, height, viewMode) {
-  console.log('init > ad', width, height, viewMode, this.isCreativeExists());
+
+  if(this._isDestroyed) {
+    return;
+  }
 
   if(this.isCreativeExists()) {
 
     // Find the best resolution for mediaFile
-    console.log('media files', this._mediaFiles);
     this._mediaFileIndex = this._mediaFiles.findIndex(function(item) {
       return item.height >= height
     });
 
-    console.log('media file index is', this._mediaFileIndex);
     if(this._mediaFileIndex != -1) {
       this._mediaFile = this._mediaFiles[this._mediaFileIndex];
     } else {
       // Get the last from array
-      console.log('get the last');
       this._mediaFile = this._mediaFiles[this._mediaFiles.length - 1];
     }
-    console.log('media file is', this._mediaFile);
+
     if(this._mediaFile) {
       // Check if VPAID
       if (this._mediaFile.mimeType === 'application/javascript') {
         this._isVPAID = true;
       }
-
-      console.log('is VPAID?', this._isVPAID);
-      console.log(this._mediaFile);
 
       this._attributes.width = width;
       this._attributes.height = height;
@@ -845,34 +784,28 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       this.resizeSlot(this._attributes.width, this._attributes.height);
 
       this._videoSlot.addEventListener('error', () => {
-        console.log('video slot error');
         this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
       }, false);
 
       if(this._isVPAID) {
         // VPAID
-        console.log('vpaid >>>>>>>>>>>>>> todo', this._mediaFile.fileURL);
-        console.log('ad is VPAID -> inject VPAID javascript of ad and validate for existing VPAID api functionality, the dispatch AdLoaded or AdError');
         this.loadCreativeAsset(this._mediaFile.fileURL);
       } else {
 
         // VAST
-        console.log('VAST');
-
         // Events
         this._slot.addEventListener('click', () => {
-          console.log('click');
           if(!this._isVPAID && this._vastTracker) {
             this._vastTracker.click();
           }
         });
 
         this._videoSlot.addEventListener('canplay', () => {
-          console.log('video slot can play');
+          // console.log('video slot can play');
         });
 
         this._videoSlot.addEventListener('play', () => {
-          console.log('video slot play');
+          // console.log('video slot play');
         });
 
         this._videoSlot.addEventListener('volumechange', (event) => {
@@ -907,7 +840,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         }, true);
 
         this._videoSlot.addEventListener('loadedmetadata', (event) => {
-          console.log('LOADED META DATA', event.target.duration);
           this._attributes.duration = event.target.duration;
           // Update tracking duration with real media meta data
           this._vastTracker && this._vastTracker.setDuration(event.target.duration);
@@ -918,7 +850,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
         this._videoSlot.addEventListener('ended', () => {
           // Complete
-          console.log('video > ended');
           this._vastTracker && this._vastTracker.complete();
 
           //setTimeout(() => {
@@ -927,7 +858,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
         });
 
-        console.log('regular > set video slot src >', this._mediaFile.fileURL);
         this._videoSlot.setAttribute('src', this._mediaFile.fileURL);
 
         // Ad Loaded
@@ -938,80 +868,30 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       if(this._vastTracker) {
 
         this._vastTracker.on('clickthrough', (url) => {
-          console.log('click', url);
           if (!this._isVPAID) {
             this.onAdClickThru(url);
           }
-          console.log('open window', url);
+
           // Open the resolved clickThrough url
           const opener = window.open(url, '_blank');
           void 0 !== opener ? opener.focus() : window.location.href = url;
         });
 
-        /*
-        this._vastTracker.on('creativeView', () => {
-          console.log('creativeView -> impression');
-          if (!this._isVPAID) {
-            //this.onAdImpression();
-          }
-        });
-
-        this._vastTracker.on('start', () => {
-          console.log('start');
-          if (!this._isVPAID) {
-            //this.onAdVideoStart();
-          }
-        });
-
-        this._vastTracker.on('firstQuartile', () => {
-          console.log('firstQuartile');
-          if (!this._isVPAID) {
-            //this.onAdVideoFirstQuartile();
-          }
-        });
-
-        this._vastTracker.on('midpoint', () => {
-          console.log('midpoint');
-          if (!this._isVPAID) {
-            //this.onAdVideoMidpoint();
-          }
-        });
-
-        this._vastTracker.on('thirdQuartile', () => {
-          console.log('thirdQuartile');
-          if (!this._isVPAID) {
-            //this.onAdVideoThirdQuartile();
-          }
-        });
-
-        this._vastTracker.on('complete', () => {
-          console.log('complete');
-          if (!this._isVPAID) {
-            //this.onAdVideoComplete();
-            //this.onAdStopped();
-          }
-        });
-        */
-
       }
 
     } else {
-      console.log('media file not found');
+      // console.log('media file not found');
     }
 
-  } else {
+  } /* else {
     this.onAdError('');
-  }
+  }*/
 }
 AdsManager.prototype.start = function() {
-
-  console.log('start > ad');
-
   if(this.isCreativeExists()) {
     this._videoSlot.muted = this._options.muted;
 
     if (this._isVPAID) {
-      console.log('start > vpaid', this._isVPAID, this._vpaidCreative);
       this._isCreativeFunctionInvokable('startAd') && this._vpaidCreative.startAd();
     } else {
 
@@ -1032,7 +912,6 @@ AdsManager.prototype.pause = function() {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('pauseAd') && this._vpaidCreative.pauseAd();
     } else {
-      console.log('pause > video');
       this._videoSlot.pause();
       this.onAdPaused();
     }
@@ -1043,7 +922,6 @@ AdsManager.prototype.resume = function() {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('resumeAd') && this._vpaidCreative.resumeAd();
     } else {
-      console.log('resume > video');
       this._videoSlot.play();
       this.onAdPlaying();
     }
@@ -1063,7 +941,6 @@ AdsManager.prototype.skip = function() {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('skipAd') && this._vpaidCreative.skipAd();
     } else {
-      console.log('skip > video');
       this.onAdSkipped();
     }
   }
@@ -1079,10 +956,8 @@ AdsManager.prototype.resize = function(width, height, viewMode) {
     this.resizeSlot(this._attributes.width, this._attributes.height);
 
     if (this._isVPAID) {
-      console.log('resize > vpaid', width, height, viewMode);
       this._isCreativeFunctionInvokable('resizeAd') && this._vpaidCreative.resizeAd(width, height, viewMode);
     } else {
-      console.log('resize > video', width, height, viewMode);
       this.onAdSizeChange();
     }
   }
@@ -1131,24 +1006,26 @@ AdsManager.prototype.expand = function() {
     }
   }
 }
-AdsManager.prototype.destroy = function() {
-  if(this.isCreativeExists()) {
-    //this.destroyAd();
-  }
-  console.log('destroy');
+AdsManager.prototype.abort = function(reCreateSlot = true) {
 
-  // Stop and clear timeouts, intervals
+  if(this._isDestroyed) {
+    return;
+  }
+
+  // abort anything that is currently doing on with the AdsManager
+  // and reset to a default state
+
+  // stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
 
   if(this._isVPAID) {
-    // Unsubscribe for VPAID events
-    console.log('unsubscribe for VPAID events');
+    // unsubscribe for VPAID events
     this.removeCallbacksForCreative(this._creativeEventCallbacks);
     this.removeCreativeAsset();
   }
 
-  // Reset global variables to default values
+  // reset global variables to default values
   this._nextQuartileIndex = 0;
 
   this._isVPAID = false;
@@ -1164,10 +1041,37 @@ AdsManager.prototype.destroy = function() {
   this._vpaidCreative = null;
   this._vastTracker = null;
 
-  //this.removeVideoSlot();
-  console.log('remove slot');
+  // Remove slot
   this.removeSlot();
 
+  if(reCreateSlot) {
+    // Re-create slot
+    this.createSlot();
+  }
+
+}
+AdsManager.prototype.destroy = function() {
+
+  if(this._isDestroyed) {
+    return;
+  }
+
+  // Reset the internal state of AdsManager
+  this.abort(false);
+  // Remove event listeners
+  this.removeEventListeners(this._eventCallbacks);
+  // Remove slot element from the DOM
+  this.removeSlot();
+
+  this._adContainer = null;
+  this._slot = null;
+  this._videoSlot = null;
+
+  this._isDestroyed = true;
+
+}
+AdsManager.prototype.isDestroyed = function() {
+  return this._isDestroyed;
 }
 AdsManager.prototype.getVersion = function() {
   return this._attributes.version;
