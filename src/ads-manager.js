@@ -1012,20 +1012,20 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
     return;
   }
 
-  // abort anything that is currently doing on with the AdsManager
-  // and reset to a default state
+  // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
+  // and stops the ad and all tracking.
 
-  // stop and clear timeouts, intervals
+  // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
 
   if(this._isVPAID) {
-    // unsubscribe for VPAID events
+    // Unsubscribe for VPAID events
     this.removeCallbacksForCreative(this._creativeEventCallbacks);
     this.removeCreativeAsset();
   }
 
-  // reset global variables to default values
+  // Reset global variables to default values
   this._nextQuartileIndex = 0;
 
   this._isVPAID = false;
@@ -1055,6 +1055,9 @@ AdsManager.prototype.destroy = function() {
   if(this._isDestroyed) {
     return;
   }
+
+  // Cleans up the internal state, abort anything that is currently doing on with the AdsManager
+  // and reset to a default state.
 
   // Reset the internal state of AdsManager
   this.abort(false);
