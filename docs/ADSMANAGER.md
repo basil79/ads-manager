@@ -19,7 +19,9 @@
   - [getRemainingTime](#getremainingtime-number)
   - [getVolume](#getvolume-number)
   - [setVolume](#setvolumevolume)
+  - [abort](#abort)
   - [destroy](#destroy)
+  - [isDestroyed](#isDestroyed)
 - [Events](#events)
 
 
@@ -176,10 +178,21 @@ Set the volume for the current ad.
 
 - **`volume: Number`** - The volume to set, from `0` (muted) to `1` (loudest).
 
-### destroy()
+### abort()
 
 Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion and stops the ad and all tracking.
 
+### destroy()
+
+Cleans up the internal state, abort anything that is currently doing on with the `AdsManager` and reset to a default state.
+
+### isDestroyed()
+
+Returns `true` if destroyed.
+
+#### Returns
+
+- **`Boolean`**
 
 
 ## Events

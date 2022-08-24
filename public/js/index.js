@@ -55,8 +55,8 @@
         appendEvent('AdError : ' + adError);
 
         if(adsManager) {
-          // abort anything that currenlty doing on with AdsManager
-          // and reset to a default state
+          // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
+          // and stops the ad and all tracking.
           adsManager.abort();
         }
 
