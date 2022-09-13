@@ -51,7 +51,13 @@
 
     // Subscribe for events
     adsManager.addEventListener('AdError', function(adError) {
+
         console.log('AdError', adError);
+        console.log('AdError -> typeof', typeof adError);
+        if(typeof adError === 'object') {
+          console.log('AdError Message', adError.getMessage());
+        }
+
         appendEvent('AdError : ' + adError);
 
         if(adsManager) {

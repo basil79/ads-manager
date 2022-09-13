@@ -57,7 +57,7 @@ const AdsManager = function(adContainer) {
     width: 300,
     height: 154,
     viewMode: 'normal',
-    desiredBitrate: 268,
+    desiredBitrate: -1, // 268,
     duration: 10,
     remainingTime: 10,
     currentTime: 0,
@@ -67,7 +67,8 @@ const AdsManager = function(adContainer) {
 
   // Quartile Events
   this._quartileEvents = [
-    { event: 'AdImpression', value: 0 }, { event: 'AdVideoStart', value: 0 },
+    { event: 'AdImpression', value: 0 },
+    { event: 'AdVideoStart', value: 0 },
     { event: 'AdVideoFirstQuartile', value: 25 },
     { event: 'AdVideoMidpoint', value: 50 },
     { event: 'AdVideoThirdQuartile', value: 75 },
@@ -95,6 +96,7 @@ const AdsManager = function(adContainer) {
   };
   // Error codes
   this.ERROR_CODES = {
+    VAST_MALFORMED_RESPONSE:100,
     ADS_REQUEST_NETWORK_ERROR: 1012,
     FAILED_TO_REQUEST_ADS: 1005,
     UNKNOWN_AD_RESPONSE: 1010,
@@ -108,6 +110,7 @@ const AdsManager = function(adContainer) {
   };
   // Error messages
   this.ERROR_MESSAGES = {
+    VAST_MALFORMED_RESPONSE: 'VAST response was malformed and could not be parsed.', // 100
     ADS_REQUEST_ERROR: 'Unable to request ads from server. Cause: {0}.', // 1005
     ADS_REQUEST_NETWORK_ERROR: 'Unable to request ads from server due to network error.', // 1012
     FAILED_TO_REQUEST_ADS: 'The was a problem requesting ads from the server.', // 1005
@@ -123,12 +126,13 @@ const AdsManager = function(adContainer) {
   };
   // Errors
   this.ERRORS = {
-    VAST_EMPTY_RESPONSE: new AdError(this.ERROR_CODES.VAST_EMPTY_RESPONSE, this.ERROR_MESSAGES.VAST_EMPTY_RESPONSE),
-    VAST_ASSET_NOT_FOUND: new AdError(this.ERROR_CODES.VAST_ASSET_NOT_FOUND, this.ERROR_MESSAGES.VAST_ASSET_NOT_FOUND),
-    VAST_LINEAR_ASSET_MISMATCH: new AdError(this.ERROR_CODES.VAST_LINEAR_ASSET_MISMATCH, this.ERROR_MESSAGES.VAST_LINEAR_ASSET_MISMATCH),
-    VAST_LOAD_TIMEOUT: new AdError(this.ERROR_CODES.VAST_LOAD_TIMEOUT, this.ERROR_MESSAGES.VAST_LOAD_TIMEOUT),
-    VAST_MEDIA_LOAD_TIMEOUT: new AdError(this.ERROR_CODES.VAST_MEDIA_LOAD_TIMEOUT, this.ERROR_MESSAGES.VAST_MEDIA_LOAD_TIMEOUT),
-    VIDEO_PLAY_ERROR: new AdError(this.ERROR_CODES.VIDEO_PLAY_ERROR, this.ERROR_MESSAGES.VIDEO_PLAY_ERROR)
+    VAST_MALFORMED_RESPONSE: new AdError(this.ERROR_MESSAGES.VAST_MALFORMED_RESPONSE, this.ERROR_CODES.VAST_MALFORMED_RESPONSE),
+    VAST_EMPTY_RESPONSE: new AdError(this.ERROR_MESSAGES.VAST_EMPTY_RESPONSE, this.ERROR_CODES.VAST_EMPTY_RESPONSE),
+    VAST_ASSET_NOT_FOUND: new AdError(this.ERROR_MESSAGES.VAST_ASSET_NOT_FOUND, this.ERROR_CODES.VAST_ASSET_NOT_FOUND),
+    VAST_LINEAR_ASSET_MISMATCH: new AdError(this.ERROR_MESSAGES.VAST_LINEAR_ASSET_MISMATCH, this.ERROR_CODES.VAST_LINEAR_ASSET_MISMATCH),
+    VAST_LOAD_TIMEOUT: new AdError(this.ERROR_MESSAGES.VAST_LOAD_TIMEOUT, this.ERROR_CODES.VAST_LOAD_TIMEOUT),
+    VAST_MEDIA_LOAD_TIMEOUT: new AdError(this.ERROR_MESSAGES.VAST_MEDIA_LOAD_TIMEOUT, this.ERROR_CODES.VAST_MEDIA_LOAD_TIMEOUT),
+    VIDEO_PLAY_ERROR: new AdError(this.ERROR_MESSAGES.VIDEO_PLAY_ERROR, this.ERROR_CODES.VIDEO_PLAY_ERROR)
   };
 
   this._vastClient = null;
@@ -146,8 +150,9 @@ const AdsManager = function(adContainer) {
   this._vpaidCreative = null;
 
   // Timers, Intervals
-  this._vastMediaLoadTimeoutId = null;
-  this._vpaidProgressCounter = null;
+  this._vastMediaLoadTimer = null;
+  this._creativeLoadTimer = null;
+  this._vpaidProgressTimer = null;
 
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
 
@@ -196,14 +201,14 @@ AdsManager.prototype.hideVideoSlot = function() {
   this._videoSlot.style.display = 'none';
 }
 AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
-  if(this._vastMediaLoadTimeoutId) {
-    clearTimeout(this._vastMediaLoadTimeoutId);
-    this._vastMediaLoadTimeoutId = null;
+  if(this._vastMediaLoadTimer) {
+    clearTimeout(this._vastMediaLoadTimer);
+    this._vastMediaLoadTimer = null;
   }
 }
 AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
-  this._vastMediaLoadTimeoutId = setTimeout(() => {
+  this._vastMediaLoadTimer = setTimeout(() => {
     this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._options.loadVideoTimeout));
   }, this._options.loadVideoTimeout);
 }
@@ -218,7 +223,7 @@ AdsManager.prototype.updateVPAIDProgress = function() {
 }
 AdsManager.prototype.startVPAIDProgress = function() {
   this.stopVPAIDProgress();
-  this._vpaidProgressCounter = setInterval(() => {
+  this._vpaidProgressTimer = setInterval(() => {
     if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
       this.updateVPAIDProgress();
     } else {
@@ -227,9 +232,9 @@ AdsManager.prototype.startVPAIDProgress = function() {
   }, 1000);
 }
 AdsManager.prototype.stopVPAIDProgress = function() {
-  if(this._vpaidProgressCounter) {
-    clearInterval(this._vpaidProgressCounter);
-    this._vpaidProgressCounter = null;
+  if(this._vpaidProgressTimer) {
+    clearInterval(this._vpaidProgressTimer);
+    this._vpaidProgressTimer = null;
   }
 }
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
@@ -438,7 +443,7 @@ AdsManager.prototype.onAdError = function(message) {
 
   if (this.EVENTS.AdError in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdError] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdError](message);
+      this._eventCallbacks[this.EVENTS.AdError](typeof message !== 'object' ? new AdError(message) : message);
     }
   }
 }
@@ -643,9 +648,11 @@ AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context)
   for (const event in eventCallbacks) eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.subscribe(eventCallbacks[event], event, context)
 }
 AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
-  for (const event in eventCallbacks) {
-    eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
-  }
+  try {
+    for (const event in eventCallbacks) {
+      eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
+    }
+  } catch(e) { console.log(e); }
 }
 AdsManager.prototype.creativeAssetLoaded = function() {
   const checkVPAIDMinVersion = () => {
@@ -713,25 +720,52 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   iframe.id = 'vpaidIframe';
   //vpaidIframe == null ? document.body.appendChild(iframe) : document.body.replaceChild(iframe, vpaidIframe);
-  vpaidIframe == null ? this._adContainer.appendChild(iframe) : this._adContainer.replaceChild(iframe, vpaidIframe);
+  vpaidIframe == null
+    ? this._adContainer.appendChild(iframe)
+    : this._adContainer.replaceChild(iframe, vpaidIframe);
+  /*
   iframe.width = 0;
   iframe.height = 0;
   iframe.style.display = 'none';
   iframe.setAttribute('allowfullscreen', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.setAttribute('allow', 'autoplay;');
+  iframe.setAttribute('allow', 'autoplay');
   iframe.tabIndex = -1;
+   */
+  //iframe.src = 'about:blank';
+  //iframe.src = 'about:self';
+  iframe.style.display = 'none';
+  iframe.style.width = '0px';
+  iframe.style.height = '0px';
+
   iframe.contentWindow.document.open();
-  // CORS?
-  iframe.contentWindow.document.write('<script type="text/javascript" src="' + fileURL + '"> \x3c/script>');
+  iframe.contentWindow.document.write(
+    '<script id="vpaidScript" type="text/javascript" src="' + fileURL + '"> \x3c/script>'
+  );
+  const vpaidScript = iframe.contentWindow.document.getElementById('vpaidScript');
+  vpaidScript.addEventListener('load', () => {
+    console.log('succ load vpaid');
+  });
+  vpaidScript.addEventListener('error', () => {
+    console.log('error load vpaid');
+    clearInterval(this._creativeLoadTimer);
+    this.onAdError('Error load VPAID');
+  });
   iframe.contentWindow.document.close();
 
-
-  this._loadIntervalTimer = setInterval(() => {
+  this._creativeLoadTimer = setInterval(() => {
     let VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
-    VPAIDAd && typeof VPAIDAd === 'function' && (clearInterval(this._loadIntervalTimer), VPAIDAd = VPAIDAd(), typeof VPAIDAd === 'undefined' ? console.log('getVPAIDAd() returns undefined value') : VPAIDAd == null ? console.log('getVPAIDAd() returns null') : (this._vpaidCreative = VPAIDAd, this.creativeAssetLoaded()))
+    VPAIDAd &&
+    typeof VPAIDAd === 'function' &&
+    (clearInterval(this._creativeLoadTimer),
+      (VPAIDAd = VPAIDAd()),
+      typeof VPAIDAd === 'undefined'
+        ? console.log('getVPAIDAd() returns undefined value')
+        : VPAIDAd == null
+          ? console.log('getVPAIDAd() returns null')
+          : ((this._vpaidCreative = VPAIDAd),
+            this.creativeAssetLoaded()));
   }, 200);
-
 }
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
@@ -889,7 +923,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 }
 AdsManager.prototype.start = function() {
   if(this.isCreativeExists()) {
-    this._videoSlot.muted = this._options.muted;
+
+    if(this._options.muted) {
+      this._videoSlot.muted = true;
+      this._videoSlot.volume = 0;
+    }
 
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('startAd') && this._vpaidCreative.startAd();
@@ -1014,7 +1052,10 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
-
+  if(this._creativeLoadTimer) {
+    clearInterval(this._creativeLoadTimer);
+    this._creativeLoadTimer = null;
+  }
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();

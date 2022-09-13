@@ -1,8 +1,8 @@
 import { format } from './utils';
 
-const AdError = function(errorCode, message, innerError) {
-  this.errorCode = errorCode;
+const AdError = function(message, errorCode, innerError) {
   this.message = message;
+  this.errorCode = errorCode;
   this.innerError = innerError;
 }
 AdError.prototype.getErrorCode = function() {
