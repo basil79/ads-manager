@@ -95,7 +95,7 @@ import { AdsManager } from 'ads-manager';
 const adContainer = document.getElementById('ad-container');
 const adsManager = new AdsManager(adContainer);
 // ...
-let vastUrl = 'http://v.ssp4.tv/pg/vast.xml';
+let vastUrl = 'http://v.adserve.tv/pg/vast.xml';
 // Request ads without options
 adsManager.requestAds(vastUrl);
 // ...
