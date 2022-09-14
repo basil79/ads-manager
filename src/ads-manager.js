@@ -441,16 +441,21 @@ AdsManager.prototype.onAllAdsCompleted = function() {
   }
 }
 AdsManager.prototype.onAdError = function(message) {
+
   this._hasError = true;
+  /*
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
+   */
+  this.abort();
 
   if (this.EVENTS.AdError in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdError] === 'function') {
       this._eventCallbacks[this.EVENTS.AdError](typeof message !== 'object' ? new AdError(message) : message);
     }
   }
+
 }
 AdsManager.prototype.onAdLog = function(message) {
   if (this.EVENTS.AdLog in this._eventCallbacks) {
@@ -761,8 +766,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   iframe.contentWindow.document.write(`
     <script>function sendMessage(msg) {
     var post = 'adm://' + JSON.stringify(msg);
-    window.parent.postMessage(post, '*');
-    console.log('iframe vpaid', post) }
+    window.parent.postMessage(post, '*'); }
      \x3c/script>
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
