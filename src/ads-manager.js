@@ -90,6 +90,7 @@ const AdsManager = function(adContainer) {
     muted: true,
     vastLoadTimeout: 23000,
     loadVideoTimeout: 8000,
+    //creativeLoadTimeout: 5000,
     withCredentials: false,
     wrapperLimit: 10,
     resolveAll: true
@@ -151,8 +152,12 @@ const AdsManager = function(adContainer) {
 
   // Timers, Intervals
   this._vastMediaLoadTimer = null;
+  //this._creativeLoadTimeoutTimer = null;
   this._creativeLoadTimer = null;
   this._vpaidProgressTimer = null;
+
+  // Handlers
+  this._handleCreativeMessageFn = this._handleCreativeMessage.bind(this);
 
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
 
@@ -648,11 +653,11 @@ AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context)
   for (const event in eventCallbacks) eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.subscribe(eventCallbacks[event], event, context)
 }
 AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
-  try {
+  if(this._vpaidCreative !== null) {
     for (const event in eventCallbacks) {
       eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
     }
-  } catch(e) { console.log(e); }
+  }
 }
 AdsManager.prototype.creativeAssetLoaded = function() {
   const checkVPAIDMinVersion = () => {
@@ -714,6 +719,18 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 
   }
 }
+AdsManager.prototype._handleCreativeMessage = function(msg) {
+  if(msg && msg.data) {
+    const match = String(msg.data).match(new RegExp('adm://(.*)'));
+    if(match) {
+      const value = JSON.parse(match[1]);
+      if(value == 'error') {
+        clearInterval(this._creativeLoadTimer);
+        this.onAdError('Error load VPAID');
+      }
+    }
+  }
+}
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   const vpaidIframe = document.getElementById('vpaidIframe'),
     iframe = document.createElement('iframe');
@@ -738,22 +755,32 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   iframe.style.width = '0px';
   iframe.style.height = '0px';
 
+  window.addEventListener('message', this._handleCreativeMessageFn);
+
   iframe.contentWindow.document.open();
-  iframe.contentWindow.document.write(
-    '<script id="vpaidScript" type="text/javascript" src="' + fileURL + '"> \x3c/script>'
-  );
-  const vpaidScript = iframe.contentWindow.document.getElementById('vpaidScript');
-  vpaidScript.addEventListener('load', () => {
-    console.log('succ load vpaid');
-  });
-  vpaidScript.addEventListener('error', () => {
-    console.log('error load vpaid');
-    clearInterval(this._creativeLoadTimer);
-    this.onAdError('Error load VPAID');
-  });
+  iframe.contentWindow.document.write(`
+    <script>function sendMessage(msg) {
+    var post = 'adm://' + JSON.stringify(msg);
+    window.parent.postMessage(post, '*');
+    console.log('iframe vpaid', post) }
+     \x3c/script>
+    <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
+  `);
   iframe.contentWindow.document.close();
 
+  /*
+  // Wait for creative loading
+  this._creativeLoadTimeoutTimer = setTimeout(() => {
+    if(this._vpaidCreative == null) {
+      clearInterval(this._creativeLoadTimer);
+      this.onAdError('Error load VPAID');
+    } else {
+      console.log('vpaid is loaded');
+    }
+  }, this._options.creativeLoadTimeout);
+   */
   this._creativeLoadTimer = setInterval(() => {
+    console.log('detect vpaid');
     let VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
     VPAIDAd &&
     typeof VPAIDAd === 'function' &&
@@ -1052,10 +1079,18 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
+  window.removeEventListener('message', this._handleCreativeMessageFn);
+
   if(this._creativeLoadTimer) {
     clearInterval(this._creativeLoadTimer);
     this._creativeLoadTimer = null;
   }
+  /*
+  if(this._creativeLoadTimeoutTimer) {
+    clearTimeout(this._creativeLoadTimeoutTimer);
+    this._creativeLoadTimeoutTimer = null;
+  }
+   */
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
