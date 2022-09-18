@@ -152,7 +152,6 @@ const AdsManager = function(adContainer) {
 
   // Timers, Intervals
   this._vastMediaLoadTimer = null;
-  //this._creativeLoadTimeoutTimer = null;
   this._creativeLoadTimer = null;
   this._vpaidProgressTimer = null;
 
@@ -745,17 +744,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   vpaidIframe == null
     ? this._adContainer.appendChild(iframe)
     : this._adContainer.replaceChild(iframe, vpaidIframe);
-  /*
-  iframe.width = 0;
-  iframe.height = 0;
-  iframe.style.display = 'none';
-  iframe.setAttribute('allowfullscreen', '');
-  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.setAttribute('allow', 'autoplay');
-  iframe.tabIndex = -1;
-   */
-  //iframe.src = 'about:blank';
-  //iframe.src = 'about:self';
+
   iframe.style.display = 'none';
   iframe.style.width = '0px';
   iframe.style.height = '0px';
@@ -772,19 +761,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   `);
   iframe.contentWindow.document.close();
 
-  /*
-  // Wait for creative loading
-  this._creativeLoadTimeoutTimer = setTimeout(() => {
-    if(this._vpaidCreative == null) {
-      clearInterval(this._creativeLoadTimer);
-      this.onAdError('Error load VPAID');
-    } else {
-      console.log('vpaid is loaded');
-    }
-  }, this._options.creativeLoadTimeout);
-   */
   this._creativeLoadTimer = setInterval(() => {
-    console.log('detect vpaid');
     let VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
     VPAIDAd &&
     typeof VPAIDAd === 'function' &&
@@ -1089,12 +1066,7 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
     clearInterval(this._creativeLoadTimer);
     this._creativeLoadTimer = null;
   }
-  /*
-  if(this._creativeLoadTimeoutTimer) {
-    clearTimeout(this._creativeLoadTimeoutTimer);
-    this._creativeLoadTimeoutTimer = null;
-  }
-   */
+
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
   this.stopVPAIDProgress();
