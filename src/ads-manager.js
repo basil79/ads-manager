@@ -148,6 +148,7 @@ const AdsManager = function(adContainer) {
   this._mediaFile = null;
 
   this._isVPAID = false;
+  this._vpaidIframe = null;
   this._vpaidCreative = null;
 
   // Timers, Intervals
@@ -736,33 +737,27 @@ AdsManager.prototype._handleCreativeMessage = function(msg) {
   }
 }
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
-  const vpaidIframe = document.getElementById('vpaidIframe'),
-    iframe = document.createElement('iframe');
+  this._vpaidIframe = document.createElement('iframe');
+  this._adContainer.appendChild(this._vpaidIframe);
 
-  iframe.id = 'vpaidIframe';
-  //vpaidIframe == null ? document.body.appendChild(iframe) : document.body.replaceChild(iframe, vpaidIframe);
-  vpaidIframe == null
-    ? this._adContainer.appendChild(iframe)
-    : this._adContainer.replaceChild(iframe, vpaidIframe);
-
-  iframe.style.display = 'none';
-  iframe.style.width = '0px';
-  iframe.style.height = '0px';
+  this._vpaidIframe.style.display = 'none';
+  this._vpaidIframe.style.width = '0px';
+  this._vpaidIframe.style.height = '0px';
 
   window.addEventListener('message', this._handleCreativeMessageFn);
 
-  iframe.contentWindow.document.open();
-  iframe.contentWindow.document.write(`
+  this._vpaidIframe.contentWindow.document.open();
+  this._vpaidIframe.contentWindow.document.write(`
     <script>function sendMessage(msg) {
     var post = 'adm://' + JSON.stringify(msg);
     window.parent.postMessage(post, '*'); }
      \x3c/script>
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
-  iframe.contentWindow.document.close();
+  this._vpaidIframe.contentWindow.document.close();
 
   this._creativeLoadTimer = setInterval(() => {
-    let VPAIDAd = document.getElementById('vpaidIframe').contentWindow.getVPAIDAd;
+    let VPAIDAd = this._vpaidIframe.contentWindow.getVPAIDAd;
     VPAIDAd &&
     typeof VPAIDAd === 'function' &&
     (clearInterval(this._creativeLoadTimer),
@@ -777,9 +772,8 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 }
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
-  const vpaidIframe = document.getElementById('vpaidIframe');
-  if(vpaidIframe) {
-    vpaidIframe.parentNode.removeChild(vpaidIframe);
+  if(this._vpaidIframe) {
+    this._vpaidIframe.parentNode.removeChild(this._vpaidIframe);
   }
 }
 AdsManager.prototype._abort = function() {
