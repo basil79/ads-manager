@@ -5,8 +5,8 @@ describe('AdsManager', function() {
 
     it('should throw', () => {
       expect(() => {
-        var adContainer = document.createElement('div');
-        var adsManager = new AdsManager();
+        const adContainer = document.createElement('div');
+        const adsManager = new AdsManager();
       }).toThrow(Error);
     })
 
