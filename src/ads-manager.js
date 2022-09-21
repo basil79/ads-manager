@@ -90,7 +90,6 @@ const AdsManager = function(adContainer) {
     muted: true,
     vastLoadTimeout: 23000,
     loadVideoTimeout: 8000,
-    //creativeLoadTimeout: 5000,
     withCredentials: false,
     wrapperLimit: 10,
     resolveAll: true
@@ -156,7 +155,7 @@ const AdsManager = function(adContainer) {
   this._vpaidProgressTimer = null;
 
   // Handlers
-  this._handleCreativeMessageFn = this._handleCreativeMessage.bind(this);
+  this._handleLoadCreativeMessage = this.handleLoadCreativeMessage.bind(this);
 
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
 
@@ -723,7 +722,7 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 
   }
 }
-AdsManager.prototype._handleCreativeMessage = function(msg) {
+AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   if (msg && msg.data) {
     const match = String(msg.data).match(new RegExp('adm://(.*)'));
     if (match) {
@@ -756,7 +755,7 @@ AdsManager.prototype._handleCreativeMessage = function(msg) {
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   // TODO:
-  window.addEventListener('message', this._handleCreativeMessageFn);
+  window.addEventListener('message', this._handleLoadCreativeMessage);
 
   // Create iframe
   this._vpaidIframe = document.createElement('iframe');
@@ -1063,7 +1062,7 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
   // TODO:
-  window.removeEventListener('message', this._handleCreativeMessageFn);
+  window.removeEventListener('message', this._handleLoadCreativeMessage);
 
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
