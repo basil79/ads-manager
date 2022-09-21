@@ -153,7 +153,6 @@ const AdsManager = function(adContainer) {
 
   // Timers, Intervals
   this._vastMediaLoadTimer = null;
-  this._creativeLoadTimer = null;
   this._vpaidProgressTimer = null;
 
   // Handlers
@@ -214,7 +213,7 @@ AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
 AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
   this._vastMediaLoadTimer = setTimeout(() => {
-    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(this._options.loadVideoTimeout));
+    this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(Math.floor((this._options.loadVideoTimeout / 1000) % 60)));
   }, this._options.loadVideoTimeout);
 }
 AdsManager.prototype.updateVPAIDProgress = function() {
@@ -725,27 +724,50 @@ AdsManager.prototype.creativeAssetLoaded = function() {
   }
 }
 AdsManager.prototype._handleCreativeMessage = function(msg) {
-  if(msg && msg.data) {
+  if (msg && msg.data) {
     const match = String(msg.data).match(new RegExp('adm://(.*)'));
-    if(match) {
+    if (match) {
       const value = JSON.parse(match[1]);
-      if(value == 'error') {
-        clearInterval(this._creativeLoadTimer);
+      if(value == 'load') {
+        console.log('vpaid loaded -> msg');
+        try {
+          let VPAIDAd = this._vpaidIframe.contentWindow.getVPAIDAd;
+          if (VPAIDAd && typeof VPAIDAd === 'function') {
+            VPAIDAd = VPAIDAd();
+            console.log('vpaid', typeof VPAIDAd);
+            typeof VPAIDAd === 'undefined'
+              ? this.onAdError('getVPAIDAd() returns undefined value')
+              : VPAIDAd == null
+                ? this.onAdError('getVPAIDAd() returns null')
+                : ((this._vpaidCreative = VPAIDAd),
+                  this.creativeAssetLoaded());
+          } else {
+            this.onAdError('getVPAIDAd() is undefined');
+          }
+        } catch (e) {
+          this.onAdError(e);
+        }
+      } else if (value == 'error') {
         this.onAdError('Error load VPAID');
       }
     }
   }
 }
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
-  this._vpaidIframe = document.createElement('iframe');
-  this._adContainer.appendChild(this._vpaidIframe);
 
+  // TODO:
+  window.addEventListener('message', this._handleCreativeMessageFn);
+
+  // Create iframe
+  this._vpaidIframe = document.createElement('iframe');
   this._vpaidIframe.style.display = 'none';
   this._vpaidIframe.style.width = '0px';
   this._vpaidIframe.style.height = '0px';
 
-  window.addEventListener('message', this._handleCreativeMessageFn);
+  // Append iframe
+  this._adContainer.appendChild(this._vpaidIframe);
 
+  // Open iframe, write and close
   this._vpaidIframe.contentWindow.document.open();
   this._vpaidIframe.contentWindow.document.write(`
     <script>function sendMessage(msg) {
@@ -755,20 +777,6 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
   this._vpaidIframe.contentWindow.document.close();
-
-  this._creativeLoadTimer = setInterval(() => {
-    let VPAIDAd = this._vpaidIframe.contentWindow.getVPAIDAd;
-    VPAIDAd &&
-    typeof VPAIDAd === 'function' &&
-    (clearInterval(this._creativeLoadTimer),
-      (VPAIDAd = VPAIDAd()),
-      typeof VPAIDAd === 'undefined'
-        ? console.log('getVPAIDAd() returns undefined value')
-        : VPAIDAd == null
-          ? console.log('getVPAIDAd() returns null')
-          : ((this._vpaidCreative = VPAIDAd),
-            this.creativeAssetLoaded()));
-  }, 200);
 }
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
@@ -837,11 +845,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         });
 
         this._videoSlot.addEventListener('canplay', () => {
-          // console.log('video slot can play');
+
         });
 
         this._videoSlot.addEventListener('play', () => {
-          // console.log('video slot play');
+
         });
 
         this._videoSlot.addEventListener('volumechange', (event) => {
@@ -1054,12 +1062,8 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
+  // TODO:
   window.removeEventListener('message', this._handleCreativeMessageFn);
-
-  if(this._creativeLoadTimer) {
-    clearInterval(this._creativeLoadTimer);
-    this._creativeLoadTimer = null;
-  }
 
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
