@@ -801,6 +801,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
   if(this.isCreativeExists()) {
 
+    if(this._options.muted) {
+      this._videoSlot.muted = true;
+      this._videoSlot.volume = 0;
+    }
+
     // Find the best resolution for mediaFile
     this._mediaFileIndex = this._mediaFiles.findIndex(function(item) {
       return item.height >= height
@@ -932,11 +937,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 }
 AdsManager.prototype.start = function() {
   if(this.isCreativeExists()) {
-
-    if(this._options.muted) {
-      this._videoSlot.muted = true;
-      this._videoSlot.volume = 0;
-    }
 
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('startAd') && this._vpaidCreative.startAd();
