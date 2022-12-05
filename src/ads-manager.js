@@ -154,6 +154,9 @@ const AdsManager = function(adContainer) {
   this._vastMediaLoadTimer = null;
   this._vpaidProgressTimer = null;
 
+  // Request ID
+  this._requestId = null;
+
   // Handlers
   this._handleLoadCreativeMessage = this.handleLoadCreativeMessage.bind(this);
 
@@ -551,6 +554,9 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     return;
   }
 
+  // Generate request Id
+  this._requestId = new Date().getTime();
+
   // Assign options
   Object.assign(this._options, options);
 
@@ -724,11 +730,11 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 }
 AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   if (msg && msg.data) {
-    const match = String(msg.data).match(new RegExp('adm://(.*)'));
+    const match = String(msg.data).match(new RegExp('adm:' + this._requestId + '://(.*)'));
     if (match) {
       const value = JSON.parse(match[1]);
       if(value == 'load') {
-        console.log('vpaid loaded -> msg');
+        console.log('vpaid message load', this._requestId);
         try {
           let VPAIDAd = this._vpaidIframe.contentWindow.getVPAIDAd;
           if (VPAIDAd && typeof VPAIDAd === 'function') {
@@ -770,8 +776,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   this._vpaidIframe.contentWindow.document.open();
   this._vpaidIframe.contentWindow.document.write(`
     <script>function sendMessage(msg) {
-    var post = 'adm://' + JSON.stringify(msg);
-    window.parent.postMessage(post, '*'); }
+    window.parent.postMessage('adm:${this._requestId}://' + JSON.stringify(msg), '*'); }
      \x3c/script>
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
