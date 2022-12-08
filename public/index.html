@@ -7,12 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/global.css">
     <style>
-        #container {
+        .container {
             position: relative;
             max-width: 640px;
             margin: 10px auto;
         }
-        #video-container {
+        .video-container {
             position: relative;
             padding-bottom: 56.25%;
         }
@@ -37,17 +37,17 @@
 <h1>Ads Manager</h1>
 <p>...</p>
 
-<div id="container">
-    <div id="video-container">
-        <video id="video-element" webkit-playsinline="true" playsinline="true">
-            <source src="https://storage.googleapis.com/interactive-media-ads/media/android.mp4"></source>
-            <source src="https://storage.googleapis.com/interactive-media-ads/media/android.webm"></source>
+<div class="container">
+    <div class="video-container">
+        <video id="video-element" webkit-playsinline="true" playsinline="true" style="background-color: rgb(0, 0, 0)" src="https://storage.googleapis.com/interactive-media-ads/media/android.mp4">
+            <!--<source src="https://storage.googleapis.com/interactive-media-ads/media/android.mp4"></source>
+            <source src="https://storage.googleapis.com/interactive-media-ads/media/android.webm"></source>-->
         </video>
         <div id="ad-container"></div>
     </div>
 </div>
 
-<!--<button id="play-button">Play</button>-->
+<button id="play-content-button" class="primary-button">Play Content</button>
 <br/>
 <br/>
 <h3>VAST Tag URL/XML Inspector (VAST, VPAID):</h3>
@@ -65,8 +65,8 @@
 <br/>
 <br/>
 
-<script src="js/ads-manager.js?v=4"></script>
-<script src="js/index.js?v=1"></script>
+<script src="js/ads-manager.js?v=13"></script>
+<script src="js/index.js?v=19"></script>
 
 
 <br/>
