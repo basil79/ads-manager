@@ -191,7 +191,7 @@
   //var vastUrl = 'http://v.adserve.tv/test/sample.xml';
   //var vastUrl = 'http://v.adserve.tv/test/wrapper-multiple-ads.xml';
   //var vastUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinearvpaid2js&correlator=';
-  var vastUrl = 'http://v.adserve.tv/pg/vast-vpaid.xml';
+  var vastUrl = 'https://v.adserve.tv/pg/vast-vpaid.xml';
   //var vastUrl = 'https://vid.springserve.com/vast/184920?ima=$[sps_ima_mode]&w=$[width]&h=$[height]&url=$[pageUrl]&cb=$[cb]&widgetid=$[widgetId]&lob=$[abc]&clipid=$[clipId]&key_custom1=^w=$[widgetId]^c=$[clipId]^i=$[clipPlayCounter]^ab=$[abc]^v=$[v]^p=$[publisherId]&key_custom2=^d=$[domain]^u=$[utm]^dv=$[device]^co=$[geo]^pl=$[playback_type]&gdpr=$[gdpr]&consent=$[cd]&viewability=$[v]&schain=$[schain]&us_privacy=$[us_privacy]&domain=$[domain]&key_custom3=$[cma1]';
   //var vastUrl = 'http://v.adserve.tv/pg/vast.xml?ip=$[ip]&w=$[width]&h=$[height]&url=$[pageUrl]&cb=$[cb]&origin_url=$[originUrl]'; //'http://localhost:3100/ads/pg/vast.xml?ip=$[ip]&w=$[width]&h=$[height]&url=$[pageUrl]&cb=$[cb]&origin_url=$[originUrl]';
   //var vastUrl = 'https://vid.springserve.com/vast-xml/247996?id=184920&a_cc=s.184920-d.247996-cv.1025&w=640&h=360&d=demo.anyclip.com&url=http%3A%2F%2Fdemo.anyclip.com%2FLuminousX%2FTestPage.html&ssid=5937c6fd-4be6-4781-b42e-e9a31c91eef9.1597672072856&uuid=4349b3fb-4108-493a-907d-c6ceca437a8f&url=http%3A%2F%2Fdemo.anyclip.com%2FLuminousX%2FTestPage.html&_rcc=en.20954_vp.20247&_vlurl=http%3A%2F%2Fwww.anyclip.com%2F';
@@ -259,7 +259,7 @@
       videoElement.play();
     }
 
-    adsManager.requestAds(giveVastUrl);
+    adsManager.requestAds(giveVastUrl, { muted: false });
   }, false);
 
   pauseAdButton.addEventListener('click', function(event) {
