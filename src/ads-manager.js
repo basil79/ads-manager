@@ -170,6 +170,7 @@ const AdsManager = function(adContainer) {
   this._isDestroyed = false;
 }
 AdsManager.prototype.createSlot = function() {
+  console.log('create slot......');
   this._slot = document.createElement('div');
   this._slot.style.position = 'absolute';
   this._slot.style.display = 'none';
@@ -187,6 +188,10 @@ AdsManager.prototype.showSlot = function() {
   }
   // Show slot
   this._slot.style.display = 'block';
+}
+AdsManager.prototype.hideSlot = function() {
+  // Show slot
+  this._slot.style.display = 'none';
 }
 AdsManager.prototype.resizeSlot = function(width, height) {
   this._slot.style.width = width + 'px';
@@ -854,11 +859,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
         });
 
         this._videoSlot.addEventListener('canplay', () => {
-
+          console.log('can play');
         });
 
         this._videoSlot.addEventListener('play', () => {
-
+          console.log('play');
         });
 
         this._videoSlot.addEventListener('volumechange', (event) => {
@@ -949,7 +954,17 @@ AdsManager.prototype.start = function() {
 
       //this._videoSlot.autoplay = true;
       this._videoSlot.load();
-      this._videoSlot.play();
+      const playPromise = this._videoSlot.play();
+      if(playPromise !== undefined) {
+        playPromise.then(_ => {
+          console.log('playback started');
+        }).catch(err => {
+          // Auto-play was prevented
+          // Show paused UI.
+          console.log('prevented', err);
+          this._videoSlot.play()
+        });
+      }
 
       this.onAdStarted();
 
@@ -1095,6 +1110,11 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
   this._vpaidCreative = null;
   this._vastTracker = null;
 
+
+  // Hide slot
+  this.hideSlot();
+
+  /*
   // Remove slot
   this.removeSlot();
 
@@ -1102,6 +1122,7 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
     // Re-create slot
     this.createSlot();
   }
+   */
 
 }
 AdsManager.prototype.destroy = function() {

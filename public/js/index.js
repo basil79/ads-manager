@@ -1,6 +1,6 @@
 (function() {
 
-  // var playButton = document.getElementById('play-button');
+  var playContentButton = document.getElementById('play-content-button');
   var testAdButton = document.getElementById('test-ad-button');
 
   var pauseAdButton = document.getElementById('pause-ad-button');
@@ -173,7 +173,7 @@
     console.log('AdClickThru', url);
     appendEvent('AdClickThru');
   });
-  adsManager.addEventListener('AllAdsCompleted', function () {
+  adsManager.addEventListener('AllAdsCompleted', async function () {
     console.log('AllAdsCompleted');
     appendEvent('AllAdsCompleted');
     isAdPaused = false;
@@ -182,6 +182,9 @@
     // Resume player
     if(!videoElement.ended) {
       videoElement.play();
+
+      console.log('set timeout of 5000, after ad complete and request ad again');
+      setTimeout(requestAd, 5000);
     }
 
     disableAdButtons();
@@ -205,9 +208,12 @@
   //var vastUrl = 'http://v.adserve.tv/test/wrapper-ad-pod.xml?ip=$[ip]&w=$[width]&h=$[height]&url=$[pageUrl]&cb=$[cb]&origin_url=$[originUrl]'; //'http://localhost:3100/ads/test/wrapper-ad-pod.xml?ip=$[ip]&w=$[width]&h=$[height]&url=$[pageUrl]&cb=$[cb]&origin_url=$[originUrl]';
 
 
+  // TODO:
+  /*
   videoElement.muted = true;
   videoElement.load();
   videoElement.play();
+   */
 
   window.addEventListener('resize', function(event) {
     console.log("window resized");
@@ -217,6 +223,7 @@
     adsManager.resize(width, height, viewMode);
   });
 
+  /*
   // Request ads
   console.log('ad request');
 
@@ -228,6 +235,7 @@
   //adsManager.requestAds(vastXML);
 
   adsManager.requestAds(vastUrl);
+   */
 
   /*
   setInterval(function() {
@@ -237,15 +245,35 @@
    */
 
 
-  /*
-  playButton.addEventListener('click', function(event) {
-    console.log('play');
-    videoElement.play();
-  }, false);
-   */
 
-  testAdButton.addEventListener('click', function() {
-    console.log('test button click');
+  playContentButton.addEventListener('click', function(event) {
+    console.log('play content');
+
+    videoElement.play();
+    requestAd();
+    /*
+    var playPromise = videoElement.play();
+    if(playPromise !== undefined) {
+      playPromise.then(_ => {
+        // Automatic playback started!
+        // Show playing UI.
+        console.log('playback started');
+        //videoElement.pause();
+        //videoElement.load();
+        return requestAd();
+      }).catch(error => {
+        // Auto-play was prevented
+        // Show paused UI.
+        console.log('prevented')
+       });
+    }
+     */
+  }, false);
+
+
+  function requestAd() {
+
+    console.log('request ad');
 
     isAdPaused = false;
     pauseAdButton.innerHTML = 'Pause Ad';
@@ -260,6 +288,11 @@
     }
 
     adsManager.requestAds(giveVastUrl, { muted: false });
+  }
+
+  testAdButton.addEventListener('click', function() {
+    console.log('test button click');
+    requestAd();
   }, false);
 
   pauseAdButton.addEventListener('click', function(event) {
