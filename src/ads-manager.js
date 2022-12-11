@@ -159,6 +159,15 @@ const AdsManager = function(adContainer) {
 
   // Handlers
   this._handleLoadCreativeMessage = this.handleLoadCreativeMessage.bind(this);
+  // Slot handlers
+  this._handleSlotClick = this.handleSlotClick.bind(this);
+  // Video slot handlers
+  this._handleVideoSlotError = this.handleVideoSlotError.bind(this);
+  this._handleVideoSlotCanPlay = this.handleVideoSlotCanPlay.bind(this);
+  this._handleVideoSlotVolumeChange = this.handleVideoSlotVolumeChange.bind(this);
+  this._handleVideoSlotTimeUpdate = this.handleVideoSlotTimeUpdate.bind(this);
+  this._handleVideoSlotLoadedMetaData = this.handleVideoSlotLoadedMetaData.bind(this);
+  this._handleVideoSlotEnded = this.handleVideoSlotEnded.bind(this);
 
   this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
 
@@ -179,7 +188,6 @@ AdsManager.prototype.createSlot = function() {
 }
 AdsManager.prototype.removeSlot = function() {
   this._slot.parentNode && this._slot.parentNode.removeChild(this._slot);
-  //this.createSlot();
 }
 AdsManager.prototype.showSlot = function() {
   // Check if video slot has src, if no then hide video slot
@@ -789,11 +797,21 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 }
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
+  console.log('remove vpaid iframe');
   if(this._vpaidIframe) {
     this._vpaidIframe.parentNode.removeChild(this._vpaidIframe);
   }
+
+  // Remove 3rd-party HTML elements from the slot
+  console.log('remove 3rd-party HTML elements from the slot');
+  [...this._slot.children]
+    .forEach(child => {
+      console.log(child !== this._videoSlot);
+      child !== this._videoSlot ? this._slot.removeChild(child) : null
+    });
 }
 AdsManager.prototype._abort = function() {
+
   // Abort
   this.abort();
 
@@ -803,7 +821,64 @@ AdsManager.prototype._abort = function() {
 AdsManager.prototype.isCreativeExists = function() {
   return this._creative && this._creative.mediaFiles.length != 0;
 }
+AdsManager.prototype.handleSlotClick = function() {
+  if(!this._isVPAID && this._vastTracker) {
+    this._vastTracker.click();
+  }
+}
+AdsManager.prototype.handleVideoSlotError = function() {
+  this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
+}
+AdsManager.prototype.handleVideoSlotCanPlay = function() {
+  console.log('video slot can play...');
+}
+AdsManager.prototype.handleVideoSlotVolumeChange = function(event) {
+  this._vastTracker && this._vastTracker.setMuted(event.target.muted);
+}
+AdsManager.prototype.handleVideoSlotTimeUpdate = function(event) {
+  if(this.isCreativeExists()) {
+
+    if (this._nextQuartileIndex >= this._quartileEvents.length) {
+      return;
+    }
+
+    const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
+    if (percentPlayed >= this._quartileEvents[this._nextQuartileIndex].value) {
+      const lastQuartileEvent = this._quartileEvents[this._nextQuartileIndex].event;
+      this._defaultEventCallbacks[lastQuartileEvent]();
+      this._nextQuartileIndex += 1;
+    }
+
+    if (percentPlayed >= 0) {
+      if (!this._hasImpression) {
+        this._vastTracker && this._vastTracker.trackImpression();
+        this._hasImpression = true;
+      }
+    }
+    this._vastTracker && this._vastTracker.setProgress(event.target.currentTime);
+    if (event.target.duration > 0) {
+      this._attributes.remainingTime = event.target.duration - event.target.currentTime;
+    }
+  }
+}
+AdsManager.prototype.handleVideoSlotLoadedMetaData = function(event) {
+  this._attributes.duration = event.target.duration;
+  // Update tracking duration with real media meta data
+  this._vastTracker && this._vastTracker.setDuration(event.target.duration);
+  //if(!this._isVPAID) {
+  this.onAdDurationChange();
+  //}
+}
+AdsManager.prototype.handleVideoSlotEnded = function() {
+  // Complete
+  this._vastTracker && this._vastTracker.complete();
+  //setTimeout(() => {
+  this.onAdStopped();
+  //}, 75);
+}
 AdsManager.prototype.init = function(width, height, viewMode) {
+
+  console.log('init....');
 
   if(this._isDestroyed) {
     return;
@@ -841,9 +916,8 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       // Resize slot
       this.resizeSlot(this._attributes.width, this._attributes.height);
 
-      this._videoSlot.addEventListener('error', () => {
-        this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
-      }, false);
+      console.log('remove and add events....');
+      this._videoSlot.addEventListener('error', this._handleVideoSlotError, false);
 
       if(this._isVPAID) {
         // VPAID
@@ -851,71 +925,16 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       } else {
 
         // VAST
-        // Events
-        this._slot.addEventListener('click', () => {
-          if(!this._isVPAID && this._vastTracker) {
-            this._vastTracker.click();
-          }
-        });
+        this._slot.addEventListener('click', this._handleSlotClick);
 
-        this._videoSlot.addEventListener('canplay', () => {
-          console.log('can play');
-        });
+        // Ad video slot event listeners
+        this._videoSlot.addEventListener('canplay', this._handleVideoSlotCanPlay);
+        this._videoSlot.addEventListener('volumechange', this._handleVideoSlotVolumeChange);
+        this._videoSlot.addEventListener('timeupdate', this._handleVideoSlotTimeUpdate, true);
+        this._videoSlot.addEventListener('loadedmetadata', this._handleVideoSlotLoadedMetaData);
+        this._videoSlot.addEventListener('ended', this._handleVideoSlotEnded);
 
-        this._videoSlot.addEventListener('play', () => {
-          console.log('play');
-        });
-
-        this._videoSlot.addEventListener('volumechange', (event) => {
-          this._vastTracker && this._vastTracker.setMuted(event.target.muted);
-        });
-
-        this._videoSlot.addEventListener('timeupdate', (event) => {
-          if(this.isCreativeExists()) {
-
-            if (this._nextQuartileIndex >= this._quartileEvents.length) {
-              return;
-            }
-
-            const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
-            if (percentPlayed >= this._quartileEvents[this._nextQuartileIndex].value) {
-              const lastQuartileEvent = this._quartileEvents[this._nextQuartileIndex].event;
-              this._defaultEventCallbacks[lastQuartileEvent]();
-              this._nextQuartileIndex += 1;
-            }
-
-            if (percentPlayed >= 0) {
-              if (!this._hasImpression) {
-                this._vastTracker && this._vastTracker.trackImpression();
-                this._hasImpression = true;
-              }
-            }
-            this._vastTracker && this._vastTracker.setProgress(event.target.currentTime);
-            if (event.target.duration > 0) {
-              this._attributes.remainingTime = event.target.duration - event.target.currentTime;
-            }
-          }
-        }, true);
-
-        this._videoSlot.addEventListener('loadedmetadata', (event) => {
-          this._attributes.duration = event.target.duration;
-          // Update tracking duration with real media meta data
-          this._vastTracker && this._vastTracker.setDuration(event.target.duration);
-          //if(!this._isVPAID) {
-            this.onAdDurationChange();
-          //}
-        });
-
-        this._videoSlot.addEventListener('ended', () => {
-          // Complete
-          this._vastTracker && this._vastTracker.complete();
-
-          //setTimeout(() => {
-            this.onAdStopped();
-          //}, 75);
-
-        });
-
+        // Set video slot src
         this._videoSlot.setAttribute('src', this._mediaFile.fileURL);
 
         // Ad Loaded
@@ -1073,7 +1092,7 @@ AdsManager.prototype.expand = function() {
     }
   }
 }
-AdsManager.prototype.abort = function(reCreateSlot = true) {
+AdsManager.prototype.abort = function() {
 
   if(this._isDestroyed) {
     return;
@@ -1081,7 +1100,6 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
-  // TODO:
   window.removeEventListener('message', this._handleLoadCreativeMessage);
 
   // Stop and clear timeouts, intervals
@@ -1110,9 +1128,25 @@ AdsManager.prototype.abort = function(reCreateSlot = true) {
   this._vpaidCreative = null;
   this._vastTracker = null;
 
+  // Remove event listeners from slot
+  this._slot.removeEventListener('click', this._handleSlotClick);
+
+  // Remove event listeners from video slot
+  this._videoSlot.removeEventListener('error', this._handleVideoSlotError, false);
+  this._videoSlot.removeEventListener('canplay', this._handleVideoSlotCanPlay);
+  this._videoSlot.removeEventListener('volumechange', this._handleVideoSlotVolumeChange);
+  this._videoSlot.removeEventListener('timeupdate', this._handleVideoSlotTimeUpdate, true);
+  this._videoSlot.removeEventListener('loadedmetadata', this._handleVideoSlotLoadedMetaData);
+  this._videoSlot.removeEventListener('ended', this._handleVideoSlotEnded);
+
+  // Pause video slot, and remove src
+  this._videoSlot.pause();
+  this._videoSlot.removeAttribute('src'); // empty source
+  this._videoSlot.load();
 
   // Hide slot
   this.hideSlot();
+
 
   /*
   // Remove slot
