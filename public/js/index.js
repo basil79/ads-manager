@@ -292,6 +292,7 @@
 
   testAdButton.addEventListener('click', function() {
     console.log('test button click');
+    videoElement.muted = true;
     requestAd();
   }, false);
 
