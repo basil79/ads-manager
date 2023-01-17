@@ -177,7 +177,7 @@ const AdsManager = function(adContainer) {
   this._hasStarted = false;
 
   this._isDestroyed = false;
-}
+};
 AdsManager.prototype.createSlot = function() {
   console.log('create slot......');
   this._slot = document.createElement('div');
@@ -185,10 +185,10 @@ AdsManager.prototype.createSlot = function() {
   this._slot.style.display = 'none';
   this._adContainer.appendChild(this._slot);
   this.createVideoSlot();
-}
+};
 AdsManager.prototype.removeSlot = function() {
   this._slot.parentNode && this._slot.parentNode.removeChild(this._slot);
-}
+};
 AdsManager.prototype.showSlot = function() {
   // Check if video slot has src, if no then hide video slot
   if(this._videoSlot.src === '') {
@@ -196,15 +196,15 @@ AdsManager.prototype.showSlot = function() {
   }
   // Show slot
   this._slot.style.display = 'block';
-}
+};
 AdsManager.prototype.hideSlot = function() {
   // Show slot
   this._slot.style.display = 'none';
-}
+};
 AdsManager.prototype.resizeSlot = function(width, height) {
   this._slot.style.width = width + 'px';
   this._slot.style.height = height + 'px';
-}
+};
 AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot = document.createElement('video');
   this._videoSlot.setAttribute('webkit-playsinline', true);
@@ -215,22 +215,22 @@ AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot.style.backgroundColor = 'rgb(0, 0, 0)';
   //this._adContainer.appendChild(this._videoSlot);
   this._slot.appendChild(this._videoSlot);
-}
+};
 AdsManager.prototype.hideVideoSlot = function() {
   this._videoSlot.style.display = 'none';
-}
+};
 AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
   if(this._vastMediaLoadTimer) {
     clearTimeout(this._vastMediaLoadTimer);
     this._vastMediaLoadTimer = null;
   }
-}
+};
 AdsManager.prototype.startVASTMediaLoadTimeout = function() {
   this.stopVASTMediaLoadTimeout();
   this._vastMediaLoadTimer = setTimeout(() => {
     this.onAdError(this.ERRORS.VAST_MEDIA_LOAD_TIMEOUT.formatMessage(Math.floor((this._options.loadVideoTimeout / 1000) % 60)));
   }, this._options.loadVideoTimeout);
-}
+};
 AdsManager.prototype.updateVPAIDProgress = function() {
   // Check remaining time
   this._attributes.remainingTime = this._isCreativeFunctionInvokable('getAdRemainingTime') ? this._vpaidCreative.getAdRemainingTime() : -1;
@@ -239,7 +239,7 @@ AdsManager.prototype.updateVPAIDProgress = function() {
     // Track progress
     this._vastTracker.setProgress(this._attributes.currentTime);
   }
-}
+};
 AdsManager.prototype.startVPAIDProgress = function() {
   this.stopVPAIDProgress();
   this._vpaidProgressTimer = setInterval(() => {
@@ -249,32 +249,32 @@ AdsManager.prototype.startVPAIDProgress = function() {
       this.stopVPAIDProgress();
     }
   }, 1000);
-}
+};
 AdsManager.prototype.stopVPAIDProgress = function() {
   if(this._vpaidProgressTimer) {
     clearInterval(this._vpaidProgressTimer);
     this._vpaidProgressTimer = null;
   }
-}
+};
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
   const givenCallback = callback.bind(context);
   this._eventCallbacks[eventName] = givenCallback;
-}
+};
 AdsManager.prototype.removeEventListener = function(eventName) {
   this._eventCallbacks[eventName] = null;
-}
+};
 AdsManager.prototype.removeEventListeners = function(eventCallbacks) {
   for (const eventName in eventCallbacks) {
     eventCallbacks.hasOwnProperty(eventName) && this.removeEventListener(eventName);
   }
-}
+};
 AdsManager.prototype.onAdsManagerLoaded = function() {
   if (this.EVENTS.AdsManagerLoaded in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdsManagerLoaded] === 'function') {
       this._eventCallbacks[this.EVENTS.AdsManagerLoaded]();
     }
   }
-}
+};
 AdsManager.prototype.onAdLoaded = function() {
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
@@ -282,7 +282,7 @@ AdsManager.prototype.onAdLoaded = function() {
       this._eventCallbacks[this.EVENTS.AdLoaded](this._creative);
     }
   }
-}
+};
 AdsManager.prototype.onAdDurationChange = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._attributes.duration = this._isCreativeFunctionInvokable('getAdDuration') ? this._vpaidCreative.getAdDuration() : -1;
@@ -295,14 +295,14 @@ AdsManager.prototype.onAdDurationChange = function() {
       this._eventCallbacks[this.EVENTS.AdDurationChange]();
     }
   }
-}
+};
 AdsManager.prototype.onAdSizeChange = function() {
   if (this.EVENTS.AdSizeChange in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdSizeChange] === 'function') {
       this._eventCallbacks[this.EVENTS.AdSizeChange]();
     }
   }
-}
+};
 AdsManager.prototype.onAdStarted = function() {
   // Show ad slot
   this.showSlot();
@@ -312,7 +312,7 @@ AdsManager.prototype.onAdStarted = function() {
       this._eventCallbacks[this.EVENTS.AdStarted]();
     }
   }
-}
+};
 AdsManager.prototype.onAdVideoStart = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
@@ -322,7 +322,7 @@ AdsManager.prototype.onAdVideoStart = function() {
       this._eventCallbacks[this.EVENTS.AdVideoStart]();
     }
   }
-}
+};
 AdsManager.prototype.onAdStopped = function() {
   if (this.EVENTS.AdStopped in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdStopped] === 'function') {
@@ -331,7 +331,7 @@ AdsManager.prototype.onAdStopped = function() {
   }
   // abort the ad, unsubscribe and reset to a default state
   this._abort();
-}
+};
 AdsManager.prototype.onAdSkipped = function() {
   if (this.EVENTS.AdSkipped in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdSkipped] === 'function') {
@@ -340,14 +340,14 @@ AdsManager.prototype.onAdSkipped = function() {
   }
   // abort the ad, unsubscribe and reset to a default state
   this._abort();
-}
+};
 AdsManager.prototype.onAdVolumeChange = function() {
   if (this.EVENTS.AdVolumeChange in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdVolumeChange] === 'function') {
       this._eventCallbacks[this.EVENTS.AdVolumeChange]();
     }
   }
-}
+};
 AdsManager.prototype.onAdImpression = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     if (!this._hasImpression) {
@@ -376,7 +376,7 @@ AdsManager.prototype.onAdImpression = function() {
       this._eventCallbacks[this.EVENTS.AdImpression]();
     }
   }
-}
+};
 AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.click();
@@ -386,7 +386,7 @@ AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
       this._eventCallbacks[this.EVENTS.AdClickThru](url, id, playerHandles);
     }
   }
-}
+};
 AdsManager.prototype.onAdVideoFirstQuartile = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
@@ -446,14 +446,14 @@ AdsManager.prototype.onAdVideoComplete = function() {
       this._eventCallbacks[this.EVENTS.AdVideoComplete]();
     }
   }
-}
+};
 AdsManager.prototype.onAllAdsCompleted = function() {
   if (this.EVENTS.AllAdsCompleted in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AllAdsCompleted] === 'function') {
       this._eventCallbacks[this.EVENTS.AllAdsCompleted]();
     }
   }
-}
+};
 AdsManager.prototype.onAdError = function(message) {
 
   this._hasError = true;
@@ -470,14 +470,14 @@ AdsManager.prototype.onAdError = function(message) {
     }
   }
 
-}
+};
 AdsManager.prototype.onAdLog = function(message) {
   if (this.EVENTS.AdLog in this._eventCallbacks) {
     if(typeof this._eventCallbacks[this.EVENTS.AdLog] === 'function') {
       this._eventCallbacks[this.EVENTS.AdLog](message);
     }
   }
-}
+};
 AdsManager.prototype.processVASTResponse = function(res) {
 
   const ads = res.ads;
@@ -487,8 +487,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
       // Ad pod
       // Filter by sequence
       this._adPod = ads.sort(function(a, b) {
-        let aSequence = a.sequence;
-        let bSequence = b.sequence;
+        const aSequence = a.sequence;
+        const bSequence = b.sequence;
         if (aSequence === bSequence) {
           return 0;
         } else if (aSequence === null) {
@@ -526,8 +526,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
 
           // Sort media files by size
           this._mediaFiles.sort(function(a, b) {
-            let aHeight = a.height;
-            let bHeight = b.height;
+            const aHeight = a.height;
+            const bHeight = b.height;
             return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
           });
 
@@ -560,7 +560,7 @@ AdsManager.prototype.processVASTResponse = function(res) {
     // The VAST response document is empty.
     this.onAdError(this.ERRORS.VAST_EMPTY_RESPONSE);
   }
-}
+};
 AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
 
   if(this._isDestroyed) {
@@ -597,8 +597,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     try {
       new URL(vastUrl);
       isURL = true;
-    } catch (e) {
-    }
+    } catch (e) {}
 
     if (isURL) {
       // use VAST URL
@@ -627,7 +626,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
   } else {
     this.onAdError('VAST URL/XML is empty');
   }
-}
+};
 AdsManager.prototype.canPlayVideoType = function(mimeType) {
   if(mimeType === 'video/3gpp' && this.supportsThreeGPVideo()) {
     return true;
@@ -639,48 +638,48 @@ AdsManager.prototype.canPlayVideoType = function(mimeType) {
     return true;
   }
   return false;
-}
+};
 AdsManager.prototype.supportsVideo = function() {
   return !!document.createElement('video').canPlayType;
-}
+};
 AdsManager.prototype.supportsH264BaselineVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
-}
+};
 AdsManager.prototype.supportsOggTheoraVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/ogg; codecs="theora, vorbis"');
-}
+};
 AdsManager.prototype.supportsWebmVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/webm; codecs="vp8, vorbis"');
-}
+};
 AdsManager.prototype.supportsThreeGPVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/3gpp; codecs="mp4v.20.8, samr"');
-}
+};
 AdsManager.prototype.handshakeVersion = function(version) {
   return this._vpaidCreative.handshakeVersion(version);
-}
+};
 AdsManager.prototype._isCreativeFunctionInvokable = function(a) {
   return this._vpaidCreative ? (a = this._vpaidCreative[a]) && typeof a === 'function' : false;
-}
+};
 AdsManager.prototype.checkVPAIDInterface = function(a) {
   const b = { passed: true, missingInterfaces: ''};
   for (let d = a.length - 1; 0 <= d; d--)
     this._isCreativeFunctionInvokable(a[d]) || (b.passed = false, b.missingInterfaces += a[d] + ' ');
   return b;
-}
+};
 AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context) {
   for (const event in eventCallbacks) eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.subscribe(eventCallbacks[event], event, context)
-}
+};
 AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
   if(this._vpaidCreative !== null) {
     for (const event in eventCallbacks) {
       eventCallbacks.hasOwnProperty(event) && this._vpaidCreative.unsubscribe(event); // && this._vpaidCreative.unsubscribe(eventCallbacks[event], event);
     }
   }
-}
+};
 AdsManager.prototype.creativeAssetLoaded = function() {
   const checkVPAIDMinVersion = () => {
     const c = this.handshakeVersion(this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1));
@@ -740,7 +739,7 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
 
   }
-}
+};
 AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   if (msg && msg.data) {
     const match = String(msg.data).match(new RegExp('adm:' + this._requestId + '://(.*)'));
@@ -770,7 +769,7 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
       }
     }
   }
-}
+};
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   // TODO:
@@ -794,7 +793,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
   this._vpaidIframe.contentWindow.document.close();
-}
+};
 AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
   console.log('remove vpaid iframe');
@@ -809,32 +808,30 @@ AdsManager.prototype.removeCreativeAsset = function() {
       console.log(child !== this._videoSlot);
       child !== this._videoSlot ? this._slot.removeChild(child) : null
     });
-}
+};
 AdsManager.prototype._abort = function() {
-
   // Abort
   this.abort();
-
   // Dispatch AllAdsCompleted
   this.onAllAdsCompleted();
-}
+};
 AdsManager.prototype.isCreativeExists = function() {
   return this._creative && this._creative.mediaFiles.length != 0;
-}
+};
 AdsManager.prototype.handleSlotClick = function() {
   if(!this._isVPAID && this._vastTracker) {
     this._vastTracker.click();
   }
-}
+};
 AdsManager.prototype.handleVideoSlotError = function() {
   this.onAdError(this.ERRORS.VIDEO_PLAY_ERROR);
-}
+};
 AdsManager.prototype.handleVideoSlotCanPlay = function() {
   console.log('video slot can play...');
-}
+};
 AdsManager.prototype.handleVideoSlotVolumeChange = function(event) {
   this._vastTracker && this._vastTracker.setMuted(event.target.muted);
-}
+};
 AdsManager.prototype.handleVideoSlotTimeUpdate = function(event) {
   if(this.isCreativeExists()) {
 
@@ -860,7 +857,7 @@ AdsManager.prototype.handleVideoSlotTimeUpdate = function(event) {
       this._attributes.remainingTime = event.target.duration - event.target.currentTime;
     }
   }
-}
+};
 AdsManager.prototype.handleVideoSlotLoadedMetaData = function(event) {
   this._attributes.duration = event.target.duration;
   // Update tracking duration with real media meta data
@@ -868,14 +865,14 @@ AdsManager.prototype.handleVideoSlotLoadedMetaData = function(event) {
   //if(!this._isVPAID) {
   this.onAdDurationChange();
   //}
-}
+};
 AdsManager.prototype.handleVideoSlotEnded = function() {
   // Complete
   this._vastTracker && this._vastTracker.complete();
   //setTimeout(() => {
   this.onAdStopped();
   //}, 75);
-}
+};
 AdsManager.prototype.init = function(width, height, viewMode) {
 
   console.log('init....');
@@ -963,7 +960,7 @@ AdsManager.prototype.init = function(width, height, viewMode) {
   } /* else {
     this.onAdError('');
   }*/
-}
+};
 AdsManager.prototype.start = function() {
   if(this.isCreativeExists()) {
 
@@ -989,10 +986,10 @@ AdsManager.prototype.start = function() {
 
     }
   }
-}
+};
 AdsManager.prototype.getDuration = function() {
   return this.isCreativeExists() && this._attributes.duration;
-}
+};
 AdsManager.prototype.pause = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1002,7 +999,7 @@ AdsManager.prototype.pause = function() {
       this.onAdPaused();
     }
   }
-}
+};
 AdsManager.prototype.resume = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1012,7 +1009,7 @@ AdsManager.prototype.resume = function() {
       this.onAdPlaying();
     }
   }
-}
+};
 AdsManager.prototype.stop = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1021,7 +1018,7 @@ AdsManager.prototype.stop = function() {
       this.onAdStopped();
     }
   }
-}
+};
 AdsManager.prototype.skip = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1030,7 +1027,7 @@ AdsManager.prototype.skip = function() {
       this.onAdSkipped();
     }
   }
-}
+};
 AdsManager.prototype.resize = function(width, height, viewMode) {
   if(this.isCreativeExists()) {
 
@@ -1047,7 +1044,7 @@ AdsManager.prototype.resize = function(width, height, viewMode) {
       this.onAdSizeChange();
     }
   }
-}
+};
 AdsManager.prototype.getVolume = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1055,7 +1052,7 @@ AdsManager.prototype.getVolume = function() {
     }
     return this._videoSlot.volume;
   }
-}
+};
 AdsManager.prototype.setVolume = function(value) {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1069,7 +1066,7 @@ AdsManager.prototype.setVolume = function(value) {
       }
     }
   }
-}
+};
 AdsManager.prototype.getRemainingTime = function() {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
@@ -1077,21 +1074,21 @@ AdsManager.prototype.getRemainingTime = function() {
     }
     return this._attributes.remainingTime;
   }
-}
+};
 AdsManager.prototype.collapse = function() {
   if(this.isCreativeExists()) {
     if(this._isVPAID) {
       this._isCreativeFunctionInvokable('collapseAd') && this._vpaidCreative.collapseAd();
     }
   }
-}
+};
 AdsManager.prototype.expand = function() {
   if(this.isCreativeExists()) {
     if(this._isVPAID) {
       this._isCreativeFunctionInvokable('expandAd') && this._vpaidCreative.expandAd();
     }
   }
-}
+};
 AdsManager.prototype.abort = function() {
 
   if(this._isDestroyed) {
@@ -1158,7 +1155,7 @@ AdsManager.prototype.abort = function() {
   }
    */
 
-}
+};
 AdsManager.prototype.destroy = function() {
 
   if(this._isDestroyed) {
@@ -1181,12 +1178,12 @@ AdsManager.prototype.destroy = function() {
 
   this._isDestroyed = true;
 
-}
+};
 AdsManager.prototype.isDestroyed = function() {
   return this._isDestroyed;
-}
+};
 AdsManager.prototype.getVersion = function() {
   return this._attributes.version;
-}
+};
 
 export { AdsManager }

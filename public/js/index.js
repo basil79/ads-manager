@@ -183,8 +183,8 @@
     if(!videoElement.ended) {
       videoElement.play();
 
-      console.log('set timeout of 5000, after ad complete and request ad again');
-      setTimeout(requestAd, 5000);
+      //console.log('set timeout of 5000, after ad complete and request ad again');
+      //setTimeout(requestAd, 5000);
     }
 
     disableAdButtons();
