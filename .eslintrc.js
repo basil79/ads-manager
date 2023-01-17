@@ -15,7 +15,7 @@ module.exports = {
     quotes: ['error', 'single'],
     //'array-callback-return': ['error'],
     camelcase: ['warn'],
-    semi: 'off',
+    semi: ['off'],
     eqeqeq: ['off'],
     //'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
     'import/named': ['error'],
