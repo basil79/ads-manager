@@ -1,7 +1,7 @@
 import { AdsManager } from './ads-manager.js';
 
 const tv = {
-  AdsManager : AdsManager
+  AdsManager
 }
 
 export { tv }
