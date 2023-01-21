@@ -1053,15 +1053,15 @@ AdsManager.prototype.getVolume = function() {
     return this._videoSlot.volume;
   }
 };
-AdsManager.prototype.setVolume = function(value) {
+AdsManager.prototype.setVolume = function(volume) {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
-      this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(value);
+      this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(volume);
     } else {
-      const isVolumeChanged = value !== this._videoSlot.volume;
+      const isVolumeChanged = volume !== this._videoSlot.volume;
       if(isVolumeChanged) {
-        this._attributes.volume = value;
-        this._videoSlot.volume = value;
+        this._attributes.volume = volume;
+        this._videoSlot.volume = volume;
         this.onAdVolumeChange();
       }
     }
