@@ -256,6 +256,11 @@ AdsManager.prototype.stopVPAIDProgress = function() {
     this._vpaidProgressTimer = null;
   }
 };
+AdsManager.prototype._callEvent = function(eventName) {
+  if(eventName in this._eventCallbacks) {
+    this._eventCallbacks[eventName]();
+  }
+};
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
   const givenCallback = callback.bind(context);
   this._eventCallbacks[eventName] = givenCallback;
@@ -269,18 +274,12 @@ AdsManager.prototype.removeEventListeners = function(eventCallbacks) {
   }
 };
 AdsManager.prototype.onAdsManagerLoaded = function() {
-  if (this.EVENTS.AdsManagerLoaded in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdsManagerLoaded] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdsManagerLoaded]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdsManagerLoaded);
 };
 AdsManager.prototype.onAdLoaded = function() {
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdLoaded] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdLoaded](this._creative);
-    }
+    this._eventCallbacks[this.EVENTS.AdLoaded](this._creative);
   }
 };
 AdsManager.prototype.onAdDurationChange = function() {
@@ -290,63 +289,34 @@ AdsManager.prototype.onAdDurationChange = function() {
       this._vastTracker.setDuration(this._attributes.duration);
     }
   }
-  if (this.EVENTS.AdDurationChange in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdDurationChange] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdDurationChange]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdDurationChange);
 };
 AdsManager.prototype.onAdSizeChange = function() {
-  if (this.EVENTS.AdSizeChange in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdSizeChange] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdSizeChange]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdSizeChange);
 };
 AdsManager.prototype.onAdStarted = function() {
   // Show ad slot
   this.showSlot();
-
-  if (this.EVENTS.AdStarted in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdStarted] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdStarted]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdStarted);
 };
 AdsManager.prototype.onAdVideoStart = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
-  if (this.EVENTS.AdVideoStart in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVideoStart] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVideoStart]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVideoStart);
 };
 AdsManager.prototype.onAdStopped = function() {
-  if (this.EVENTS.AdStopped in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdStopped] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdStopped]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdStopped);
   // abort the ad, unsubscribe and reset to a default state
   this._abort();
 };
 AdsManager.prototype.onAdSkipped = function() {
-  if (this.EVENTS.AdSkipped in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdSkipped] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdSkipped]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdSkipped);
   // abort the ad, unsubscribe and reset to a default state
   this._abort();
 };
 AdsManager.prototype.onAdVolumeChange = function() {
-  if (this.EVENTS.AdVolumeChange in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVolumeChange] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVolumeChange]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVolumeChange);
 };
 AdsManager.prototype.onAdImpression = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
@@ -371,88 +341,54 @@ AdsManager.prototype.onAdImpression = function() {
       this._hasImpression = true;
     }
   }
-  if (this.EVENTS.AdImpression in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdImpression] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdImpression]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdImpression);
 };
 AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.click();
   }
   if (this.EVENTS.AdClickThru in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdClickThru] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdClickThru](url, id, playerHandles);
-    }
+    this._eventCallbacks[this.EVENTS.AdClickThru](url, id, playerHandles);
   }
 };
 AdsManager.prototype.onAdVideoFirstQuartile = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
-  if (this.EVENTS.AdVideoFirstQuartile in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVideoFirstQuartile] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVideoFirstQuartile]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVideoFirstQuartile);
 };
 AdsManager.prototype.onAdVideoMidpoint = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
-  if (this.EVENTS.AdVideoMidpoint in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVideoMidpoint] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVideoMidpoint]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVideoMidpoint);
 };
 AdsManager.prototype.onAdVideoThirdQuartile = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
-  if (this.EVENTS.AdVideoThirdQuartile in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVideoThirdQuartile] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVideoThirdQuartile]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVideoThirdQuartile);
 };
 AdsManager.prototype.onAdPaused = function() {
   if(this._vastTracker) {
     this._vastTracker.setPaused(true);
   }
-  if (this.EVENTS.AdPaused in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdPaused] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdPaused]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdPaused);
 };
 AdsManager.prototype.onAdPlaying = function() {
   if(this._vastTracker) {
     this._vastTracker.setPaused(false);
   }
-  if (this.EVENTS.AdPlaying in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdPlaying] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdPlaying]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdPlaying);
 };
 AdsManager.prototype.onAdVideoComplete = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.complete();
   }
-  if (this.EVENTS.AdVideoComplete in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdVideoComplete] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdVideoComplete]();
-    }
-  }
+  this._callEvent(this.EVENTS.AdVideoComplete);
 };
 AdsManager.prototype.onAllAdsCompleted = function() {
-  if (this.EVENTS.AllAdsCompleted in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AllAdsCompleted] === 'function') {
-      this._eventCallbacks[this.EVENTS.AllAdsCompleted]();
-    }
-  }
+  this._callEvent(this.EVENTS.AllAdsCompleted);
 };
 AdsManager.prototype.onAdError = function(message) {
 
@@ -465,17 +401,12 @@ AdsManager.prototype.onAdError = function(message) {
   this.abort();
 
   if (this.EVENTS.AdError in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdError] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdError](typeof message !== 'object' ? new AdError(message) : message);
-    }
+    this._eventCallbacks[this.EVENTS.AdError](typeof message !== 'object' ? new AdError(message) : message);
   }
-
 };
 AdsManager.prototype.onAdLog = function(message) {
   if (this.EVENTS.AdLog in this._eventCallbacks) {
-    if(typeof this._eventCallbacks[this.EVENTS.AdLog] === 'function') {
-      this._eventCallbacks[this.EVENTS.AdLog](message);
-    }
+    this._eventCallbacks[this.EVENTS.AdLog](message);
   }
 };
 AdsManager.prototype.processVASTResponse = function(res) {
