@@ -70,7 +70,7 @@ adsManager.addEventListener('AdError', function(adError) {
 adsManager.addEventListener('AdLoaded', function(adEvent) {
   // Ad loaded, awaiting start
   // Check if ad type is linear
-  if(adEvent.type === 'linear') {
+  if(adEvent.isLinear()) {
     try {
       // Start ad
       adsManager.start();

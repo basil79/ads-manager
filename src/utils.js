@@ -10,6 +10,31 @@ function format(message, ...values) {
   return message
 }
 
+function isIframe() {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
+
+function isTopWindowAccessible() {
+  let topDoc;
+  try {
+    topDoc = window.top.document;
+  } catch (e) {
+    return false;
+  }
+  return (topDoc !== null);
+}
+
+function getTopWindow() {
+  return (isIframe() && isTopWindowAccessible()) ? window.top : window;
+}
+
 export {
-  format
+  format,
+  isIframe,
+  isTopWindowAccessible,
+  getTopWindow
 }
