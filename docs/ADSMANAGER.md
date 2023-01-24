@@ -82,6 +82,7 @@ Request ads from a server.
 
 - **`vastUrl: String`** - The url of the VAST tag, or VAST XML
 - **`options: Object`** - An optional Object to configure the ad request
+    - **`muted: Boolean`** - A boolean, whether the ad will be played while muted.
     - **`vastLoadTimeout: Number`** - VAST document load timeout (default `23000 ms`)
     - **`loadVideoTimeout: Number`** - VAST media file (assets) load timeout (default `8000 ms`)
     - **`withCredentials: Boolean`** - A boolean to enable the withCredentials options for the XHR URLHandler (default `false`)

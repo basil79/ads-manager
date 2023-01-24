@@ -1,9 +1,13 @@
 import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
+import { getTopWindow } from './utils';
 import AdError from './ad-error';
+import Ad from './ad';
 
 const AdsManager = function(adContainer) {
 
-  if(!(adContainer instanceof Element || adContainer instanceof HTMLDocument)) {
+  if(!(adContainer && (adContainer instanceof Element
+    || adContainer instanceof HTMLDocument
+    || adContainer.getRootNode))) {
     throw new Error('ad container is not defined');
   }
 
@@ -122,7 +126,7 @@ const AdsManager = function(adContainer) {
     VAST_LOAD_TIMEOUT: 'Ad request reached a timeout.', // 301
     VAST_MEDIA_LOAD_TIMEOUT: 'VAST media file loading reached a timeout of {0} seconds.', // 402
     VIDEO_PLAY_ERROR: 'There was an error playing the video ad.', // 400
-    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for more info.' // 901
+    VPAID_CREATIVE_ERROR: 'An unexpected error occurred within the VPAID creative. Refer to the inner error for more info.' // 901 TODO:
   };
   // Errors
   this.ERRORS = {
@@ -279,7 +283,7 @@ AdsManager.prototype.onAdsManagerLoaded = function() {
 AdsManager.prototype.onAdLoaded = function() {
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
-    this._eventCallbacks[this.EVENTS.AdLoaded](this._creative);
+    this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._creative));
   }
 };
 AdsManager.prototype.onAdDurationChange = function() {
@@ -667,8 +671,11 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     // iniAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars)
     // Start loadVideoTimeout
     this.startVASTMediaLoadTimeout();
-    this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
-
+    try {
+      this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
+    } catch(err) {
+      this.onAdError(err);
+    }
   }
 };
 AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
@@ -703,8 +710,7 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
 };
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
-  // TODO:
-  window.addEventListener('message', this._handleLoadCreativeMessage);
+  getTopWindow().addEventListener('message', this._handleLoadCreativeMessage);
 
   // Create iframe
   this._vpaidIframe = document.createElement('iframe');
@@ -988,13 +994,15 @@ AdsManager.prototype.setVolume = function(volume) {
   if(this.isCreativeExists()) {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(volume);
-    } else {
-      const isVolumeChanged = volume !== this._videoSlot.volume;
-      if(isVolumeChanged) {
-        this._attributes.volume = volume;
-        this._videoSlot.volume = volume;
-        this.onAdVolumeChange();
+    }
+    const isVolumeChanged = volume !== this._videoSlot.volume;
+    if(isVolumeChanged) {
+      this._attributes.volume = volume;
+      if(volume !== 0) {
+        this._videoSlot.muted = false;
       }
+      this._videoSlot.volume = volume;
+      this.onAdVolumeChange();
     }
   }
 };
@@ -1028,7 +1036,7 @@ AdsManager.prototype.abort = function() {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
-  window.removeEventListener('message', this._handleLoadCreativeMessage);
+  getTopWindow().removeEventListener('message', this._handleLoadCreativeMessage);
 
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
