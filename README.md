@@ -35,7 +35,7 @@ This README is for developers who want to use and/or contribute to ads-manager.
 ## Usage
 
 ```javascript
-import { AdsManager } from 'ads-manager';
+import AdsManager from 'ads-manager';
 
 // Get your video element
 const videoElement = document.getElementById('video');
