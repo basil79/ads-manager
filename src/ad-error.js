@@ -14,6 +14,9 @@ AdError.prototype.getErrorCode = function() {
 AdError.prototype.getInnerError = function() {
   return this.innerError instanceof Object ? this.innerError : null;
 };
+AdError.prototype.setInnerError = function(innerError) {
+  this.innerError = innerError
+}
 AdError.prototype.formatMessage = function(...values) {
   this.message = format(this.message, values);
   return this;
