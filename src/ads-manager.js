@@ -135,7 +135,8 @@ const AdsManager = function(adContainer) {
     VAST_LINEAR_ASSET_MISMATCH: new AdError(this.ERROR_MESSAGES.VAST_LINEAR_ASSET_MISMATCH, this.ERROR_CODES.VAST_LINEAR_ASSET_MISMATCH),
     VAST_LOAD_TIMEOUT: new AdError(this.ERROR_MESSAGES.VAST_LOAD_TIMEOUT, this.ERROR_CODES.VAST_LOAD_TIMEOUT),
     VAST_MEDIA_LOAD_TIMEOUT: new AdError(this.ERROR_MESSAGES.VAST_MEDIA_LOAD_TIMEOUT, this.ERROR_CODES.VAST_MEDIA_LOAD_TIMEOUT),
-    VIDEO_PLAY_ERROR: new AdError(this.ERROR_MESSAGES.VIDEO_PLAY_ERROR, this.ERROR_CODES.VIDEO_PLAY_ERROR)
+    VIDEO_PLAY_ERROR: new AdError(this.ERROR_MESSAGES.VIDEO_PLAY_ERROR, this.ERROR_CODES.VIDEO_PLAY_ERROR),
+    VPAID_CREATIVE_ERROR: new AdError(this.ERROR_MESSAGES.VPAID_CREATIVE_ERROR, this.ERROR_CODES.VPAID_ERROR)
   };
 
   this._vastClient = null;
@@ -298,6 +299,7 @@ AdsManager.prototype.onAdSizeChange = function() {
   this._callEvent(this.EVENTS.AdSizeChange);
 };
 AdsManager.prototype.onAdStarted = function() {
+  this._hasStarted = true;
   // Show ad slot
   this.showSlot();
   this._callEvent(this.EVENTS.AdStarted);
@@ -309,9 +311,13 @@ AdsManager.prototype.onAdVideoStart = function() {
   this._callEvent(this.EVENTS.AdVideoStart);
 };
 AdsManager.prototype.onAdStopped = function() {
-  this._callEvent(this.EVENTS.AdStopped);
-  // abort the ad, unsubscribe and reset to a default state
-  this._abort();
+  if(!this._hasStarted) {
+    this.onAdError(this.ERRORS.VPAID_CREATIVE_ERROR);
+  } else {
+    this._callEvent(this.EVENTS.AdStopped);
+    // abort the ad, unsubscribe and reset to a default state
+    this._abort();
+  }
 };
 AdsManager.prototype.onAdSkipped = function() {
   this._callEvent(this.EVENTS.AdSkipped);

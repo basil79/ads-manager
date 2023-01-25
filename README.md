@@ -38,7 +38,7 @@ This README is for developers who want to use and/or contribute to ads-manager.
 import AdsManager from 'ads-manager';
 
 // Get your video element
-const videoElement = document.getElementById('video');
+const videoElement = document.getElementById('video-element');
 // Get your HTML element for ad container
 const adContainer = document.getElementById('ad-container');
 // Define ads manager and pass ad container
