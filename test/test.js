@@ -1,11 +1,11 @@
-import { AdsManager } from '../src/ads-manager';
+import AdsManager from '../src/ads-manager';
 
 describe('AdsManager', function() {
   describe('#constructor', () => {
 
-    it('check interfaces', () => {
-      let adContainer = document.createElement('div');
-      let adsManager = new AdsManager(adContainer);
+    it('check constructor', () => {
+      const adContainer = document.createElement('div');
+      const adsManager = new AdsManager(adContainer);
 
     })
 
