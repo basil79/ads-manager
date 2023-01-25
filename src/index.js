@@ -1,4 +1,4 @@
-import { AdsManager } from './ads-manager.js';
+import AdsManager from './ads-manager.js';
 
 const tv = {
   AdsManager

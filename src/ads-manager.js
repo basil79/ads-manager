@@ -5,8 +5,7 @@ import Ad from './ad';
 
 const AdsManager = function(adContainer) {
 
-  if(!(adContainer && (adContainer instanceof Element
-    || adContainer instanceof HTMLDocument
+  if(!(adContainer && (adContainer instanceof HTMLElement
     || adContainer.getRootNode))) {
     throw new Error('ad container is not defined');
   }
@@ -1125,4 +1124,4 @@ AdsManager.prototype.getVersion = function() {
   return this._attributes.version;
 };
 
-export { AdsManager }
+export default AdsManager
