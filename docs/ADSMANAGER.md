@@ -39,8 +39,8 @@ constructor(adContainer)
 
 #### Example
 
-```Javascript
-import { AdsManager } from 'ads-manager';
+```javascript
+import AdsManager from 'ads-manager';
 
 const adContainer = document.getElementById('ad-container');
 // Define ads manager
@@ -90,13 +90,13 @@ Request ads from a server.
 
 #### Example
 
-```Javascript
-import { AdsManager } from 'ads-manager';
+```javascript
+import AdsManager from 'ads-manager';
 
 const adContainer = document.getElementById('ad-container');
 const adsManager = new AdsManager(adContainer);
 // ...
-let vastUrl = 'http://v.adserve.tv/pg/vast.xml';
+let vastUrl = 'https://v.adserve.tv/pg/vast.xml';
 // Request ads without options
 adsManager.requestAds(vastUrl);
 // ...
@@ -115,7 +115,7 @@ Call init to initialize the ad experience on the ads manager.
 
 - **`width: Number`** - The desired width of the ad.
 - **`height: Number`** - The desired height of the ad.
-- **`viewMode: String`** - The desired view mode. Value must not be null. Possible values (`"normal"`, `"thumbnail"` or `"fullscreen"`). Width and height are not required when
+- **`viewMode: String`** - The desired view mode. Value must not be null. Possible values (`"normal"` or `"fullscreen"`). Width and height are not required when
   viewMode is fullscreen.
 
 ### start()
@@ -146,7 +146,7 @@ Resizes the current ad. After the resize is completed the `AdsManager` fires an 
 
 - **`width: Number`** - New ad slot width.
 - **`height: Number`** - New ad slot height.
-- **`viewMode: String`** - The new view mode. Value must not be null. Possible values (`"normal"`, `"thumbnail"` or `"fullscreen"`). Width and height are not required when
+- **`viewMode: String`** - The new view mode. Value must not be null. Possible values (`"normal"` or `"fullscreen"`). Width and height are not required when
   viewMode is fullscreen.
 
 ### getDuration(): Number
