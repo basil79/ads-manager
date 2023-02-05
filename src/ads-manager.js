@@ -145,6 +145,8 @@ const AdsManager = function(adContainer) {
 
   this._ad = null;
   this._adPod = null;
+  this._isAdPod = false;
+
   this._creative = null;
   this._mediaFiles = null;
   this._mediaFileIndex = 0;
@@ -281,6 +283,7 @@ AdsManager.prototype.onAdsManagerLoaded = function() {
   this._callEvent(this.EVENTS.AdsManagerLoaded);
 };
 AdsManager.prototype.onAdLoaded = function() {
+  this._hasLoaded = true;
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
     this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._creative));
@@ -314,9 +317,39 @@ AdsManager.prototype.onAdStopped = function() {
   if(!this._hasStarted) {
     this.onAdError(this.ERRORS.VPAID_CREATIVE_ERROR);
   } else {
-    this._callEvent(this.EVENTS.AdStopped);
-    // abort the ad, unsubscribe and reset to a default state
-    this._abort();
+    if(this._isAdPod && this._adPod.length != 0) {
+
+      this._nextQuartileIndex = 0;
+      this._hasImpression = false;
+
+      // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
+      // and stops the ad and all tracking.
+      getTopWindow().removeEventListener('message', this._handleLoadCreativeMessage);
+
+      if(this._isVPAID) {
+        // Unsubscribe for VPAID events
+        this.removeCallbacksForCreative(this._creativeEventCallbacks);
+        this.removeCreativeAsset();
+        this._isVPAID = false;
+      }
+
+      // Remove handlers from slot and videoSlot
+      this._removeHandlers();
+      // Pause video slot, and remove src
+      this._videoSlot.pause();
+      this._videoSlot.removeAttribute('src'); // empty source
+      this._videoSlot.load();
+
+      setTimeout(() => {
+        this._nextAd();
+      },75);
+
+    } else {
+      console.log('is adpod', this._isAdPod);
+      this._callEvent(this.EVENTS.AdStopped);
+      // abort the ad, unsubscribe and reset to a default state
+      this._abort();
+    }
   }
 };
 AdsManager.prototype.onAdSkipped = function() {
@@ -328,6 +361,7 @@ AdsManager.prototype.onAdVolumeChange = function() {
   this._callEvent(this.EVENTS.AdVolumeChange);
 };
 AdsManager.prototype.onAdImpression = function() {
+  console.log('is vpaid', this._isVPAID);
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     if (!this._hasImpression) {
       // Check duration
@@ -425,6 +459,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
 
     if(ads.length > 1) {
       // Ad pod
+      this._isAdPod = true;
+      console.log('ads', ads);
       // Filter by sequence
       this._adPod = ads.sort(function(a, b) {
         const aSequence = a.sequence;
@@ -439,62 +475,15 @@ AdsManager.prototype.processVASTResponse = function(res) {
         return (aSequence < bSequence) ? -1 : (aSequence > bSequence) ? 1 : 0;
       });
 
-      this._ad = ads[0];
+      // Shift from adPod array
+      this._ad = this._adPod.shift();
     } else {
       // Ad
       this._ad = ads[0];
     }
 
-    if(this._ad) {
-
-      // Filter linear creatives, get first
-      this._creative = ads[0].creatives.filter(creative => creative.type === 'linear')[0];
-      // Check if creative has media files
-      if(this._creative) {
-
-        if(this._creative.mediaFiles.length != 0) {
-          // Filter and check media files for mime type canPlay and if VPAID or not
-          this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
-            // mime types -> mp4, webm, ogg, 3gp
-            if(this.canPlayVideoType(mediaFile.mimeType)) {
-              return mediaFile;
-            } else if(mediaFile.mimeType === 'application/javascript') {
-              // apiFramework -> mime type -> application/javascript
-              return mediaFile;
-            }
-          });//[0]; // take the first one
-
-          // Sort media files by size
-          this._mediaFiles.sort(function(a, b) {
-            const aHeight = a.height;
-            const bHeight = b.height;
-            return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
-          });
-
-          if(this._mediaFiles && this._mediaFiles.length != 0) {
-            // TODO: move after adLoaded
-            // Init VAST Tracker for tracking events
-            this._vastTracker = new VASTTracker(null, this._ad, this._creative);
-            this._vastTracker.load();
-
-            // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
-            this.onAdsManagerLoaded();
-          } else {
-            // Linear assets were found in the VASt ad response, but none of them match the video player's capabilities.
-            this.onAdError(this.ERRORS.VAST_LINEAR_ASSET_MISMATCH);
-          }
-
-        } else {
-          // No assets were found in the VAST ad response.
-          this.onAdError(this.ERRORS.VAST_ASSET_NOT_FOUND);
-        }
-      } else {
-        // TODO:
-        // Non Linear
-        console.log('non linear');
-      }
-
-    }
+    // Process ad
+    this._processAd();
 
   } else {
     // The VAST response document is empty.
@@ -751,6 +740,18 @@ AdsManager.prototype.removeCreativeAsset = function() {
       child !== this._videoSlot ? this._slot.removeChild(child) : null
     });
 };
+AdsManager.prototype._removeHandlers = function() {
+  // Remove event listeners from slot
+  this._slot.removeEventListener('click', this._handleSlotClick);
+
+  // Remove event listeners from video slot
+  this._videoSlot.removeEventListener('error', this._handleVideoSlotError, false);
+  this._videoSlot.removeEventListener('canplay', this._handleVideoSlotCanPlay);
+  this._videoSlot.removeEventListener('volumechange', this._handleVideoSlotVolumeChange);
+  this._videoSlot.removeEventListener('timeupdate', this._handleVideoSlotTimeUpdate, true);
+  this._videoSlot.removeEventListener('loadedmetadata', this._handleVideoSlotLoadedMetaData);
+  this._videoSlot.removeEventListener('ended', this._handleVideoSlotEnded);
+};
 AdsManager.prototype._abort = function() {
   // Abort
   this.abort();
@@ -815,7 +816,65 @@ AdsManager.prototype.handleVideoSlotEnded = function() {
   this.onAdStopped();
   //}, 75);
 };
-AdsManager.prototype.init = function(width, height, viewMode) {
+AdsManager.prototype._processAd = function(isNext = false) {
+
+  // Filter linear creatives, get first
+  this._creative = this._ad.creatives.filter(creative => creative.type === 'linear')[0];
+  // Check if creative has media files
+  if(this._creative) {
+
+    if(this._creative.mediaFiles.length != 0) {
+      // Filter and check media files for mime type canPlay and if VPAID or not
+      this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
+        // mime types -> mp4, webm, ogg, 3gp
+        if(this.canPlayVideoType(mediaFile.mimeType)) {
+          return mediaFile;
+        } else if(mediaFile.mimeType === 'application/javascript') {
+          // apiFramework -> mime type -> application/javascript
+          return mediaFile;
+        }
+      });//[0]; // take the first one
+
+      // Sort media files by size
+      this._mediaFiles.sort(function(a, b) {
+        const aHeight = a.height;
+        const bHeight = b.height;
+        return (aHeight < bHeight) ? -1 : (aHeight > bHeight) ? 1 : 0;
+      });
+
+      if(this._mediaFiles && this._mediaFiles.length != 0) {
+        // Initialize VASTTracker for tracking events
+        this._vastTracker = new VASTTracker(null, this._ad, this._creative);
+        this._vastTracker.load();
+
+        if(!isNext) {
+          // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
+          this.onAdsManagerLoaded();
+        } else {
+          this.init(this._attributes.width, this._attributes.height, this._attributes.viewMode, isNext);
+        }
+      } else {
+        // Linear assets were found in the VAST ad response, but none of them match the video player's capabilities.
+        this.onAdError(this.ERRORS.VAST_LINEAR_ASSET_MISMATCH);
+      }
+
+    } else {
+      // No assets were found in the VAST ad response.
+      this.onAdError(this.ERRORS.VAST_ASSET_NOT_FOUND);
+    }
+  } else {
+    // Non Linear
+    console.log('non linear');
+    this.onAdError('non linear');
+  }
+};
+AdsManager.prototype._nextAd = function() {
+  // Shift next ad
+  this._ad = this._adPod.shift();
+  // Process ad
+  this._processAd(true);
+};
+AdsManager.prototype.init = function(width, height, viewMode, isNext = false) {
 
   console.log('init....');
 
@@ -825,9 +884,11 @@ AdsManager.prototype.init = function(width, height, viewMode) {
 
   if(this.isCreativeExists()) {
 
-    if(this._options.muted) {
-      this._videoSlot.muted = true;
-      this._videoSlot.volume = 0;
+    if(!isNext) {
+      if (this._options.muted) {
+        this._videoSlot.muted = true;
+        this._videoSlot.volume = 0;
+      }
     }
 
     // Find the best resolution for mediaFile
@@ -855,7 +916,6 @@ AdsManager.prototype.init = function(width, height, viewMode) {
       // Resize slot
       this.resizeSlot(this._attributes.width, this._attributes.height);
 
-      console.log('remove and add events....');
       this._videoSlot.addEventListener('error', this._handleVideoSlotError, false);
 
       if(this._isVPAID) {
@@ -1064,21 +1124,16 @@ AdsManager.prototype.abort = function() {
   this._hasStarted = false;
 
   this._ad = null;
+  this._adPod = null;
+  this._isAdPod = false;
+
   this._creative = null;
   this._mediaFile = null;
   this._vpaidCreative = null;
   this._vastTracker = null;
 
-  // Remove event listeners from slot
-  this._slot.removeEventListener('click', this._handleSlotClick);
-
-  // Remove event listeners from video slot
-  this._videoSlot.removeEventListener('error', this._handleVideoSlotError, false);
-  this._videoSlot.removeEventListener('canplay', this._handleVideoSlotCanPlay);
-  this._videoSlot.removeEventListener('volumechange', this._handleVideoSlotVolumeChange);
-  this._videoSlot.removeEventListener('timeupdate', this._handleVideoSlotTimeUpdate, true);
-  this._videoSlot.removeEventListener('loadedmetadata', this._handleVideoSlotLoadedMetaData);
-  this._videoSlot.removeEventListener('ended', this._handleVideoSlotEnded);
+  // Remove handlers from slot and videoSlot
+  this._removeHandlers();
 
   // Pause video slot, and remove src
   this._videoSlot.pause();
@@ -1087,17 +1142,6 @@ AdsManager.prototype.abort = function() {
 
   // Hide slot
   this.hideSlot();
-
-
-  /*
-  // Remove slot
-  this.removeSlot();
-
-  if(reCreateSlot) {
-    // Re-create slot
-    this.createSlot();
-  }
-   */
 
 };
 AdsManager.prototype.destroy = function() {
