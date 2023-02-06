@@ -345,7 +345,6 @@ AdsManager.prototype.onAdStopped = function() {
       },75);
 
     } else {
-      console.log('is adpod', this._isAdPod);
       this._callEvent(this.EVENTS.AdStopped);
       // abort the ad, unsubscribe and reset to a default state
       this._abort();
@@ -863,7 +862,7 @@ AdsManager.prototype._processAd = function(isNext = false) {
       this.onAdError(this.ERRORS.VAST_ASSET_NOT_FOUND);
     }
   } else {
-    // Non Linear
+    // Non-Linear
     console.log('non linear');
     this.onAdError('non linear');
   }
@@ -871,6 +870,7 @@ AdsManager.prototype._processAd = function(isNext = false) {
 AdsManager.prototype._nextAd = function() {
   // Shift next ad
   this._ad = this._adPod.shift();
+  console.log('next ad', this._ad);
   // Process ad
   this._processAd(true);
 };
@@ -1154,7 +1154,7 @@ AdsManager.prototype.destroy = function() {
   // and reset to a default state.
 
   // Reset the internal state of AdsManager
-  this.abort(false);
+  this.abort();
   // Remove event listeners
   this.removeEventListeners(this._eventCallbacks);
   // Remove slot element from the DOM
