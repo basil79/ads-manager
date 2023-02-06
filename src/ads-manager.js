@@ -1060,13 +1060,15 @@ AdsManager.prototype.setVolume = function(volume) {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(volume);
     }
-    const isVolumeChanged = volume !== this._videoSlot.volume;
+    const isVolumeChanged = volume !== (this._videoSlot.muted ? 0 : this._videoSlot.volume);
     if(isVolumeChanged) {
       this._attributes.volume = volume;
-      if(volume !== 0) {
+      if(this._attributes.volume !== 0) {
         this._videoSlot.muted = false;
+      } else {
+        this._videoSlot.muted = true;
       }
-      this._videoSlot.volume = volume;
+      this._videoSlot.volume = this._attributes.volume;
       this.onAdVolumeChange();
     }
   }
