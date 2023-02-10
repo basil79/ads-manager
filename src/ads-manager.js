@@ -718,7 +718,21 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   this._vpaidIframe.contentWindow.document.open();
   this._vpaidIframe.contentWindow.document.write(`
     <script>function sendMessage(msg) {
-    window.parent.postMessage('adm:${this._requestId}://' + JSON.stringify(msg), '*'); }
+    var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
+    window.parent.postMessage(postMsg, '*');
+    if(window.parent !== window) {
+        window.postMessage(postMsg,'*');
+    }
+    try {
+        if(window.parent !== window.top) {
+            window.top.postMessage(postMsg,'*');
+            for (var i = 0; i < window.top.frames.length; i++) {
+                try {
+                    window.top.frames[i].postMessage(postMsg,'*');
+                } catch(e) {}
+            }
+        }
+    } catch(e) {} }
      \x3c/script>
     <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
   `);
