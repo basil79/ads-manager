@@ -204,7 +204,7 @@ AdsManager.prototype.showSlot = function() {
   this._slot.style.display = 'block';
 };
 AdsManager.prototype.hideSlot = function() {
-  // Show slot
+  // Hide slot
   this._slot.style.display = 'none';
 };
 AdsManager.prototype.resizeSlot = function(width, height) {
@@ -1052,7 +1052,9 @@ AdsManager.prototype.getVolume = function() {
     if (this._isVPAID) {
       return this._isCreativeFunctionInvokable('getAdVolume') ? this._vpaidCreative.getAdVolume() : -1;
     }
-    return this._videoSlot.volume;
+    // on iOS the video slot volume is always 1 even if the video slot is muted,
+    // if video slot is muted, return 0, otherwise volume
+    return this._videoSlot.muted ? 0 : this._videoSlot.volume;
   }
 };
 AdsManager.prototype.setVolume = function(volume) {
