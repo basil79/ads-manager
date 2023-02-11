@@ -175,7 +175,7 @@ const AdsManager = function(adContainer) {
   this._handleVideoSlotLoadedMetaData = this.handleVideoSlotLoadedMetaData.bind(this);
   this._handleVideoSlotEnded = this.handleVideoSlotEnded.bind(this);
 
-  this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN = 2;
+  this.MIN_VPAID_VERSION = 2;
 
   this._hasLoaded = false;
   this._hasError = false;
@@ -610,8 +610,8 @@ AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
 };
 AdsManager.prototype.creativeAssetLoaded = function() {
   const checkVPAIDMinVersion = () => {
-    const c = this.handshakeVersion(this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1));
-    return c ? parseFloat(c) < this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN ? (this.onAdError('Only support creatives with VPAID version >= ' + this.SUPPORTED_CREATIVE_VPAID_VERSION_MIN.toFixed(1)), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
+    const c = this.handshakeVersion(this.MIN_VPAID_VERSION.toFixed(1));
+    return c ? parseFloat(c) < this.MIN_VPAID_VERSION ? (this.onAdError('Only support creatives with VPAID version >= ' + this.MIN_VPAID_VERSION.toFixed(1)), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
   };
   if (function(that) {
     const c = that.checkVPAIDInterface('handshakeVersion initAd startAd stopAd subscribe unsubscribe getAdLinear'.split(' '));
