@@ -720,9 +720,6 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
     <script>function sendMessage(msg) {
     var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
     window.parent.postMessage(postMsg, '*');
-    if(window.parent !== window) {
-        window.postMessage(postMsg,'*');
-    }
     try {
         if(window.parent !== window.top) {
             window.top.postMessage(postMsg,'*');
