@@ -1,5 +1,4 @@
 import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
-import { getTopWindow } from './utils';
 import AdError from './ad-error';
 import Ad from './ad';
 
@@ -324,7 +323,7 @@ AdsManager.prototype.onAdStopped = function() {
 
       // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
       // and stops the ad and all tracking.
-      getTopWindow().removeEventListener('message', this._handleLoadCreativeMessage);
+      window.removeEventListener('message', this._handleLoadCreativeMessage);
 
       if(this._isVPAID) {
         // Unsubscribe for VPAID events
@@ -703,7 +702,7 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
 };
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
-  getTopWindow().addEventListener('message', this._handleLoadCreativeMessage);
+  window.addEventListener('message', this._handleLoadCreativeMessage);
 
   // Create iframe
   this._vpaidIframe = document.createElement('iframe');
@@ -716,23 +715,17 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   // Open iframe, write and close
   this._vpaidIframe.contentWindow.document.open();
-  this._vpaidIframe.contentWindow.document.write(`
-    <script>function sendMessage(msg) {
-    var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
+  this._vpaidIframe.contentWindow.document.write(`<script>function sendMessage(msg) {
+  var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
+  if(window.parent.length > 1) {
+    for (var i = 0; i < window.parent.length; i++) {
+      window.parent[i].postMessage(postMsg, '*');
+    }
+  } else {
     window.parent.postMessage(postMsg, '*');
-    try {
-        if(window.parent !== window.top) {
-            window.top.postMessage(postMsg,'*');
-            for (var i = 0; i < window.top.frames.length; i++) {
-                try {
-                    window.top.frames[i].postMessage(postMsg,'*');
-                } catch(e) {}
-            }
-        }
-    } catch(e) {} }
-     \x3c/script>
-    <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
-  `);
+  }
+} \x3c/script>
+  <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>`);
   this._vpaidIframe.contentWindow.document.close();
 };
 AdsManager.prototype.removeCreativeAsset = function() {
@@ -1116,7 +1109,7 @@ AdsManager.prototype.abort = function() {
 
   // Removes ad assets loaded at runtime that need to be properly removed at the time of ad completion
   // and stops the ad and all tracking.
-  getTopWindow().removeEventListener('message', this._handleLoadCreativeMessage);
+  window.removeEventListener('message', this._handleLoadCreativeMessage);
 
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
