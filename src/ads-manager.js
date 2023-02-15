@@ -674,6 +674,7 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   if (msg && msg.data) {
     const match = String(msg.data).match(new RegExp('adm:' + this._requestId + '://(.*)'));
     if (match) {
+      console.log('vpaid creative message', match);
       const value = JSON.parse(match[1]);
       if(value == 'load') {
         console.log('vpaid message load', this._requestId);
@@ -702,6 +703,7 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
 };
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
+  console.log('vpaid creative asset', fileURL);
   window.addEventListener('message', this._handleLoadCreativeMessage);
 
   // Create iframe
@@ -715,7 +717,8 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   // Open iframe, write and close
   this._vpaidIframe.contentWindow.document.open();
-  this._vpaidIframe.contentWindow.document.write(`<script>function sendMessage(msg) {
+  this._vpaidIframe.contentWindow.document.write(`
+<script>function sendMessage(msg) {
   var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
   if(window.parent.length > 1) {
     for (var i = 0; i < window.parent.length; i++) {
@@ -725,7 +728,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
     window.parent.postMessage(postMsg, '*');
   }
 } \x3c/script>
-  <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>`);
+<script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>`);
   this._vpaidIframe.contentWindow.document.close();
 };
 AdsManager.prototype.removeCreativeAsset = function() {
@@ -1066,15 +1069,15 @@ AdsManager.prototype.setVolume = function(volume) {
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('setAdVolume') && this._vpaidCreative.setAdVolume(volume);
     }
-    const isVolumeChanged = volume !== (this._videoSlot.muted ? 0 : this._videoSlot.volume);
+    const isVolumeChanged = volume !== this.getVolume();
+    this._attributes.volume = volume;
+    if(this._attributes.volume !== 0) {
+      this._videoSlot.muted = false;
+    } else {
+      this._videoSlot.muted = true;
+    }
+    this._videoSlot.volume = this._attributes.volume;
     if(isVolumeChanged) {
-      this._attributes.volume = volume;
-      if(this._attributes.volume !== 0) {
-        this._videoSlot.muted = false;
-      } else {
-        this._videoSlot.muted = true;
-      }
-      this._videoSlot.volume = this._attributes.volume;
       this.onAdVolumeChange();
     }
   }
