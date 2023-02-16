@@ -973,23 +973,41 @@ AdsManager.prototype.init = function(width, height, viewMode, isNext = false) {
 AdsManager.prototype.start = function() {
   if(this.isCreativeExists()) {
 
+    // Override play function
+    // Backup origin play function
+    const _play = this._videoSlot.play;
+    const maxPlayRetries = 3;
+    let playRetries = 0;
+    this._videoSlot.play = function() {
+      //this.muted = true;
+      // Apply origin play, and connect to play Promise to detect autoplay exceptions
+      const _playPromise = _play.apply(this, [].slice.call(arguments));
+      if(_playPromise instanceof Promise) {
+        _playPromise.then(_=> {
+          // Autoplay worked!
+          console.log('autoplay worked!!!', this);
+        }).catch(err => {
+          // Autoplay failed
+          if(playRetries <= maxPlayRetries) {
+            // Try to play as muted if failed in autoplay
+            console.log('autoplay failed > play retries', playRetries);
+            this.muted = true;
+            this.play();
+
+            playRetries++;
+          }
+        });
+      }
+      return _playPromise;
+    };
+
     if (this._isVPAID) {
       this._isCreativeFunctionInvokable('startAd') && this._vpaidCreative.startAd();
     } else {
 
       //this._videoSlot.autoplay = true;
       this._videoSlot.load();
-      const playPromise = this._videoSlot.play();
-      if(playPromise !== undefined) {
-        playPromise.then(_ => {
-          console.log('playback started');
-        }).catch(err => {
-          // Auto-play was prevented
-          // Show paused UI.
-          console.log('prevented', err);
-          this._videoSlot.play()
-        });
-      }
+      this._videoSlot.play();
 
       this.onAdStarted();
 
