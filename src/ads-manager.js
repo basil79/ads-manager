@@ -720,13 +720,7 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   this._vpaidIframe.contentWindow.document.write(`
 <script>function sendMessage(msg) {
   var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
-  if(window.parent.length > 1) {
-    for (var i = 0; i < window.parent.length; i++) {
-      window.parent[i].postMessage(postMsg, '*');
-    }
-  } else {
-    window.parent.postMessage(postMsg, '*');
-  }
+  window.parent.postMessage(postMsg, '*');
 } \x3c/script>
 <script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>`);
   this._vpaidIframe.contentWindow.document.close();
