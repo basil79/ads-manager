@@ -9,6 +9,7 @@ const AdsManager = function(adContainer) {
     throw new Error('ad container is not defined');
   }
 
+
   // Ad Container
   this._adContainer = adContainer;
 
@@ -182,6 +183,7 @@ const AdsManager = function(adContainer) {
   this._hasStarted = false;
 
   this._isDestroyed = false;
+
 };
 AdsManager.prototype.createSlot = function() {
   console.log('create slot......');
@@ -189,6 +191,8 @@ AdsManager.prototype.createSlot = function() {
   this._slot.style.position = 'absolute';
   this._slot.style.display = 'none';
   this._adContainer.appendChild(this._slot);
+
+
   this.createVideoSlot();
 };
 AdsManager.prototype.removeSlot = function() {
@@ -196,8 +200,9 @@ AdsManager.prototype.removeSlot = function() {
 };
 AdsManager.prototype.showSlot = function() {
   // Check if video slot has src, if no then hide video slot
+
   if(this._videoSlot.src === '') {
-    this.hideVideoSlot();
+    // this.hideVideoSlot();
   }
   // Show slot
   this._slot.style.display = 'block';
@@ -207,8 +212,8 @@ AdsManager.prototype.hideSlot = function() {
   this._slot.style.display = 'none';
 };
 AdsManager.prototype.resizeSlot = function(width, height) {
-  this._slot.style.width = width + 'px';
-  this._slot.style.height = height + 'px';
+  this._slot.style.width = `${width }px`;
+  this._slot.style.height = `${height }px`;
 };
 AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot = document.createElement('video');
@@ -267,6 +272,7 @@ AdsManager.prototype._callEvent = function(eventName) {
   }
 };
 AdsManager.prototype.addEventListener = function(eventName, callback, context) {
+
   const givenCallback = callback.bind(context);
   this._eventCallbacks[eventName] = givenCallback;
 };
@@ -282,8 +288,11 @@ AdsManager.prototype.onAdsManagerLoaded = function() {
   this._callEvent(this.EVENTS.AdsManagerLoaded);
 };
 AdsManager.prototype.onAdLoaded = function() {
+
   this._hasLoaded = true;
+
   this.stopVASTMediaLoadTimeout();
+
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
     this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._creative));
   }
@@ -451,7 +460,7 @@ AdsManager.prototype.onAdLog = function(message) {
   }
 };
 AdsManager.prototype.processVASTResponse = function(res) {
-
+ 
   const ads = res.ads;
   if(ads.length != 0) {
 
@@ -489,7 +498,8 @@ AdsManager.prototype.processVASTResponse = function(res) {
   }
 };
 AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
-
+ 
+  
   if(this._isDestroyed) {
     return;
   }
@@ -594,7 +604,7 @@ AdsManager.prototype._isCreativeFunctionInvokable = function(a) {
 AdsManager.prototype.checkVPAIDInterface = function(a) {
   const b = { passed: true, missingInterfaces: ''};
   for (let d = a.length - 1; 0 <= d; d--)
-    this._isCreativeFunctionInvokable(a[d]) || (b.passed = false, b.missingInterfaces += a[d] + ' ');
+    this._isCreativeFunctionInvokable(a[d]) || (b.passed = false, b.missingInterfaces += `${a[d] } `);
   return b;
 };
 AdsManager.prototype.setCallbacksForCreative = function(eventCallbacks, context) {
@@ -610,40 +620,41 @@ AdsManager.prototype.removeCallbacksForCreative = function(eventCallbacks) {
 AdsManager.prototype.creativeAssetLoaded = function() {
   const checkVPAIDMinVersion = () => {
     const c = this.handshakeVersion(this.MIN_VPAID_VERSION.toFixed(1));
-    return c ? parseFloat(c) < this.MIN_VPAID_VERSION ? (this.onAdError('Only support creatives with VPAID version >= ' + this.MIN_VPAID_VERSION.toFixed(1)), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
+    return c ? parseFloat(c) < this.MIN_VPAID_VERSION ? (this.onAdError(`Only support creatives with VPAID version >= ${ this.MIN_VPAID_VERSION.toFixed(1)}`), !1) : !0 : (this.onAdError('Cannot get VPAID version from the creative'), !1)
   };
   if (function(that) {
     const c = that.checkVPAIDInterface('handshakeVersion initAd startAd stopAd subscribe unsubscribe getAdLinear'.split(' '));
-    c.passed || that.onAdError('Missing interfaces in the VPAID creative: ' + c.missingInterfaces);
+    c.passed || that.onAdError(`Missing interfaces in the VPAID creative: ${ c.missingInterfaces}`);
     return c.passed
   }(this) && checkVPAIDMinVersion()) {
 
+
     // VPAID events
     this._creativeEventCallbacks = {
-      AdStarted: this.onAdStarted,
-      AdStopped: this.onAdStopped,
-      AdSkipped: this.onAdSkipped,
-      AdLoaded: this.onAdLoaded,
+      AdStarted: this.onAdStarted.bind(this),
+      AdStopped: this.onAdStopped.bind(this),
+      AdSkipped: this.onAdSkipped.bind(this),
+      AdLoaded:  this.onAdLoaded.bind(this),
       //AdLinearChange: this.onAdLinearChange,
-      AdSizeChange: this.onAdSizeChange,
+      AdSizeChange: this.onAdSizeChange.bind(this),
       //AdExpandedChange: this.onAdExpandedChange,
-      AdDurationChange: this.onAdDurationChange,
-      AdVolumeChange: this.onAdVolumeChange,
-      AdImpression: this.onAdImpression,
-      AdClickThru: this.onAdClickThru,
+      AdDurationChange: this.onAdDurationChange.bind(this),
+      AdVolumeChange: this.onAdVolumeChange.bind(this),
+      AdImpression: this.onAdImpression.bind(this),
+      AdClickThru: this.onAdClickThru.bind(this),
       //AdInteraction: this.onAdInteraction,
-      AdVideoStart: this.onAdVideoStart,
-      AdVideoFirstQuartile: this.onAdVideoFirstQuartile,
-      AdVideoMidpoint: this.onAdVideoMidpoint,
-      AdVideoThirdQuartile: this.onAdVideoThirdQuartile,
-      AdVideoComplete: this.onAdVideoComplete,
+      AdVideoStart: this.onAdVideoStart.bind(this),
+      AdVideoFirstQuartile: this.onAdVideoFirstQuartile.bind(this),
+      AdVideoMidpoint: this.onAdVideoMidpoint.bind(this),
+      AdVideoThirdQuartile: this.onAdVideoThirdQuartile.bind(this),
+      AdVideoComplete: this.onAdVideoComplete.bind(this),
       //AdUserAcceptInvitation: this.onAdUserAcceptInvitation,
       //AdUserMinimize: this.onAdUserMinimize,
       //AdUserClose: this.onAdUserClose,
-      AdPaused: this.onAdPaused,
-      AdPlaying: this.onAdPlaying, // onAdResumed
-      AdError: this.onAdError,
-      AdLog: this.onAdLog
+      AdPaused: this.onAdPaused.bind(this),
+      AdPlaying: this.onAdPlaying.bind(this), // onAdResumed
+      AdError: this.onAdError.bind(this),
+      AdLog: this.onAdLog.bind(this)
     }
 
     // Subscribe for VPAID events
@@ -655,16 +666,26 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     const creativeData = {
       AdParameters: this._creative.adParameters
     };
+
+    const slotInIframe = this._vpaidIframe.contentDocument.querySelector('#slot');
+
+    slotInIframe.setAttribute('style', 'width:' + width + 'px; height:'+height+'px');
+
     const environmentVars = {
-      slot: this._slot,
+      slot: slotInIframe,
       videoSlot: this._videoSlot,
       videoSlotCanAutoPlay: true
     };
+
     // iniAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars)
     // Start loadVideoTimeout
     this.startVASTMediaLoadTimeout();
+
+
     try {
+
       this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
+
     } catch(err) {
       this.onAdError(err);
     }
@@ -672,7 +693,7 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 };
 AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   if (msg && msg.data) {
-    const match = String(msg.data).match(new RegExp('adm:' + this._requestId + '://(.*)'));
+    const match = String(msg.data).match(new RegExp(`adm:${ this._requestId }://(.*)`));
     if (match) {
       console.log('vpaid creative message', match);
       const value = JSON.parse(match[1]);
@@ -702,15 +723,20 @@ AdsManager.prototype.handleLoadCreativeMessage = function(msg) {
   }
 };
 AdsManager.prototype.loadCreativeAsset = function(fileURL) {
-
+ 
   console.log('vpaid creative asset', fileURL);
   window.addEventListener('message', this._handleLoadCreativeMessage);
 
   // Create iframe
   this._vpaidIframe = document.createElement('iframe');
-  this._vpaidIframe.style.display = 'none';
-  this._vpaidIframe.style.width = '0px';
-  this._vpaidIframe.style.height = '0px';
+  this._vpaidIframe.style.position = 'absolute';
+  this._vpaidIframe.style.width = '100%';
+  this._vpaidIframe.style.height = '100%';
+  this._vpaidIframe.style.left = '0px';
+  this._vpaidIframe.style.right = '0px';
+  this._vpaidIframe.style.border= 'none';
+  
+  console.log(this._videoSlot.clientHeight);
 
   // Append iframe
   this._adContainer.appendChild(this._vpaidIframe);
@@ -722,7 +748,10 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   var postMsg = 'adm:${this._requestId}://' + JSON.stringify(msg);
   window.parent.postMessage(postMsg, '*');
 } \x3c/script>
-<script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>`);
+<script type="text/javascript" onload="sendMessage('load')" onerror="sendMessage('error')" src="${fileURL}"> \x3c/script>
+<body style="margin: 0px; padding:0px; height: 100%; overflow: hidden; background: transparent;"><div id="slot" style="position: absolute; left:0px; right:0px; z-index: 1000"></div></body>
+`
+);
   this._vpaidIframe.contentWindow.document.close();
 };
 AdsManager.prototype.removeCreativeAsset = function() {
@@ -816,6 +845,11 @@ AdsManager.prototype.handleVideoSlotEnded = function() {
   this.onAdStopped();
   //}, 75);
 };
+
+AdsManager.prototype.checkOnSkippable = function(){
+  return this._creative?.trackingEvents?.skip?.length > 0
+}
+
 AdsManager.prototype._processAd = function(isNext = false) {
 
   // Filter linear creatives, get first
@@ -846,6 +880,7 @@ AdsManager.prototype._processAd = function(isNext = false) {
         // Initialize VASTTracker for tracking events
         this._vastTracker = new VASTTracker(null, this._ad, this._creative);
         this._vastTracker.load();
+
 
         if(!isNext) {
           // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
