@@ -681,7 +681,6 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     // Start loadVideoTimeout
     this.startVASTMediaLoadTimeout();
 
-
     try {
 
       this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
@@ -846,8 +845,8 @@ AdsManager.prototype.handleVideoSlotEnded = function() {
   //}, 75);
 };
 
-AdsManager.prototype.checkOnSkippable = function(){
-  return this._creative?.trackingEvents?.skip?.length > 0
+AdsManager.prototype.getAdSkippableState = function(){
+  return this._vpaidCreative?.getAdSkippableState();
 }
 
 AdsManager.prototype._processAd = function(isNext = false) {
