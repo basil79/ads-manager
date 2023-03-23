@@ -52,6 +52,13 @@ const AdsManager = function(adContainer) {
     AdLog: 'AdLog',
     AllAdsCompleted: 'AllAdsCompleted' // After all ads completed, vast, vpaid, vmap
   };
+
+  // vpaid loaded async
+
+  this.EVENTS_CUSTOM = {
+    AdVpaidLoaded: 'AdVpaidLoaded'
+  }
+  
   this._eventCallbacks = {};
   this._creativeEventCallbacks = {};
 
@@ -155,7 +162,7 @@ const AdsManager = function(adContainer) {
   this._isVPAID = false;
   this._vpaidIframe = null;
   this._vpaidCreative = null;
-
+ 
   // Timers, Intervals
   this._vastMediaLoadTimer = null;
   this._vpaidProgressTimer = null;
@@ -685,6 +692,8 @@ AdsManager.prototype.creativeAssetLoaded = function() {
 
       this._vpaidCreative.initAd(width, height, this._attributes.viewMode, this._attributes.desiredBitrate, creativeData, environmentVars);
 
+      this._callEvent(this.EVENTS_CUSTOM.AdVpaidLoaded);
+
     } catch(err) {
       this.onAdError(err);
     }
@@ -735,8 +744,6 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   this._vpaidIframe.style.right = '0px';
   this._vpaidIframe.style.border= 'none';
   
-  console.log(this._videoSlot.clientHeight);
-
   // Append iframe
   this._adContainer.appendChild(this._vpaidIframe);
 
