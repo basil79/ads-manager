@@ -187,7 +187,7 @@ AdsManager.prototype.createSlot = function() {
   console.log('create slot......');
   this._slot = document.createElement('div');
   this._slot.style.position = 'absolute';
-  this._slot.style.display = 'none';
+  //this._slot.style.display = 'none';
   this._adContainer.appendChild(this._slot);
   this.createVideoSlot();
 };
@@ -218,11 +218,15 @@ AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot.style.width = '100%';
   this._videoSlot.style.height = '100%';
   this._videoSlot.style.backgroundColor = 'rgb(0, 0, 0)';
+  this._videoSlot.style.display = 'none';
   //this._adContainer.appendChild(this._videoSlot);
   this._slot.appendChild(this._videoSlot);
 };
 AdsManager.prototype.hideVideoSlot = function() {
   this._videoSlot.style.display = 'none';
+};
+AdsManager.prototype.showVideoSlot = function() {
+  this._videoSlot.style.display = 'block';
 };
 AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
   if(this._vastMediaLoadTimer) {
@@ -303,7 +307,12 @@ AdsManager.prototype.onAdSizeChange = function() {
 AdsManager.prototype.onAdStarted = function() {
   this._hasStarted = true;
   // Show ad slot
-  this.showSlot();
+  //this.showSlot();
+  if(this._videoSlot.src === '') {
+    this.hideVideoSlot();
+  } else {
+    this.showVideoSlot();
+  }
   this._callEvent(this.EVENTS.AdStarted);
 };
 AdsManager.prototype.onAdVideoStart = function() {
@@ -1164,7 +1173,8 @@ AdsManager.prototype.abort = function() {
   this._videoSlot.load();
 
   // Hide slot
-  this.hideSlot();
+  //this.hideSlot();
+  this.hideVideoSlot();
 
 };
 AdsManager.prototype.destroy = function() {
