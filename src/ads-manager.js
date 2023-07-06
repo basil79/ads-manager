@@ -791,7 +791,7 @@ AdsManager.prototype.handleVideoSlotTimeUpdate = function(event) {
       return;
     }
 
-    const percentPlayed = event.target.currentTime * 100.0 / event.target.duration;
+    const percentPlayed = (event.target.currentTime / event.target.duration) * 100; //event.target.currentTime * 100.0 / event.target.duration;
     if (percentPlayed >= this._quartileEvents[this._nextQuartileIndex].value) {
       const lastQuartileEvent = this._quartileEvents[this._nextQuartileIndex].event;
       this._defaultEventCallbacks[lastQuartileEvent]();
@@ -804,6 +804,7 @@ AdsManager.prototype.handleVideoSlotTimeUpdate = function(event) {
         this._hasImpression = true;
       }
     }
+    console.log('percentPlayed', percentPlayed, event.target.currentTime, event.target.duration);
     this._vastTracker && this._vastTracker.setProgress(event.target.currentTime);
     if (event.target.duration > 0) {
       this._attributes.remainingTime = event.target.duration - event.target.currentTime;
