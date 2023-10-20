@@ -44,7 +44,8 @@
   "author": "Basil Goldman",
   "license": "Apache-2.0",
   "dependencies": {
-    "@dailymotion/vast-client": "^4.0.1"
+    "@dailymotion/vast-client": "^4.0.1",
+    "ads-manager": "^1.2.11"
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
