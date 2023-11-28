@@ -520,7 +520,9 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     timeout: this._options.vastLoadTimeout,
     withCredentials: this._options.withCredentials,
     wrapperLimit: this._options.wrapperLimit,
-    resolveAll: this._options.resolveAll
+    resolveAll: this._options.resolveAll,
+    //allowMultipleAds: true,
+    //followAdditionalWrappers: true,
   };
 
   // Abort
@@ -541,6 +543,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       this._vastClient
         .get(vastUrl, vastOptions)
         .then(res => {
+          console.log('RES', res);
           this.processVASTResponse(res);
         })
         .catch(err => {
@@ -553,6 +556,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       this._vastParser
         .parseVAST(vastXml, vastOptions)
         .then(res => {
+          console.log('RES', res);
           this.processVASTResponse(res);
         })
         .catch(err => {
