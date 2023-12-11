@@ -219,14 +219,47 @@ AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot.style.height = '100%';
   this._videoSlot.style.backgroundColor = 'rgb(0, 0, 0)';
   this._videoSlot.style.display = 'none';
+
+  const that = this;
+
+  // Overwrite getter/setter of src
+  const _src = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+  Object.defineProperty(this._videoSlot, 'src', {
+    set: function(value) {
+      _src.set.call(this, value);
+      console.log('video src changed', value);
+      that.showHideVideoSlot();
+    },
+    get: _src.get
+  });
+  // Override setAttribute function
+  const _setAttribute = this._videoSlot.setAttribute;
+  this._videoSlot.setAttribute = function() {
+    const value = _setAttribute.apply(this, [].slice.call(arguments))
+    if(arguments[0] === 'src') {
+      console.log('video setAttribute src', arguments[1]);
+      that.showHideVideoSlot();
+    }
+    return value;
+  }
+
   //this._adContainer.appendChild(this._videoSlot);
   this._slot.appendChild(this._videoSlot);
 };
 AdsManager.prototype.hideVideoSlot = function() {
+  console.log('hide video slot');
   this._videoSlot.style.display = 'none';
 };
 AdsManager.prototype.showVideoSlot = function() {
+  console.log('show video slot');
   this._videoSlot.style.display = 'block';
+};
+AdsManager.prototype.showHideVideoSlot = function() {
+  if(this._videoSlot.getAttribute('src') === '') {
+    this.hideVideoSlot();
+  } else {
+    this.showVideoSlot();
+  }
 };
 AdsManager.prototype.stopVASTMediaLoadTimeout = function() {
   if(this._vastMediaLoadTimer) {
@@ -306,13 +339,6 @@ AdsManager.prototype.onAdSizeChange = function() {
 };
 AdsManager.prototype.onAdStarted = function() {
   this._hasStarted = true;
-  // Show ad slot
-  //this.showSlot();
-  if(this._videoSlot.src === '') {
-    this.hideVideoSlot();
-  } else {
-    this.showVideoSlot();
-  }
   this._callEvent(this.EVENTS.AdStarted);
 };
 AdsManager.prototype.onAdVideoStart = function() {
@@ -520,7 +546,9 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
     timeout: this._options.vastLoadTimeout,
     withCredentials: this._options.withCredentials,
     wrapperLimit: this._options.wrapperLimit,
-    resolveAll: this._options.resolveAll
+    resolveAll: this._options.resolveAll,
+    //allowMultipleAds: true,
+    //followAdditionalWrappers: true,
   };
 
   // Abort
@@ -541,6 +569,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       this._vastClient
         .get(vastUrl, vastOptions)
         .then(res => {
+          console.log('RES', res);
           this.processVASTResponse(res);
         })
         .catch(err => {
@@ -553,6 +582,7 @@ AdsManager.prototype.requestAds = function(vastUrl, options = {}) {
       this._vastParser
         .parseVAST(vastXml, vastOptions)
         .then(res => {
+          console.log('RES', res);
           this.processVASTResponse(res);
         })
         .catch(err => {
