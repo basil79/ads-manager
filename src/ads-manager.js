@@ -694,6 +694,7 @@ AdsManager.prototype.creativeAssetLoaded = function() {
     const creativeData = {
       AdParameters: this._creative.adParameters
     };
+    console.log('creativeData', creativeData);
     const environmentVars = {
       slot: this._slot,
       videoSlot: this._videoSlot,
