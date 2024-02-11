@@ -12,13 +12,15 @@ const AdsManager = function(adContainer) {
   // Ad Container
   this._adContainer = adContainer;
 
-  // Slot
-  this._slot = null;
+  // Own Slot
+  this._ownSlot = null;
   // Video Slot
   this._videoSlot = null;
+  // Slot
+  this._slot = null;
 
-  // Create Slot
-  this.createSlot();
+  // Create Own Slot
+  this.createOwnSlot();
 
   // Events
   this.EVENTS = {
@@ -183,16 +185,17 @@ const AdsManager = function(adContainer) {
 
   this._isDestroyed = false;
 };
-AdsManager.prototype.createSlot = function() {
+AdsManager.prototype.createOwnSlot = function() {
   console.log('create slot......');
-  this._slot = document.createElement('div');
-  this._slot.style.position = 'absolute';
+  this._ownSlot = document.createElement('div');
+  this._ownSlot.style.position = 'absolute';
   //this._slot.style.display = 'none';
-  this._adContainer.appendChild(this._slot);
+  this._adContainer.appendChild(this._ownSlot);
   this.createVideoSlot();
+  this.createSlot();
 };
 AdsManager.prototype.removeSlot = function() {
-  this._slot.parentNode && this._slot.parentNode.removeChild(this._slot);
+  this._ownSlot.parentNode && this._ownSlot.parentNode.removeChild(this._ownSlot);
 };
 AdsManager.prototype.showSlot = function() {
   // Check if video slot has src, if no then hide video slot
@@ -200,15 +203,15 @@ AdsManager.prototype.showSlot = function() {
     this.hideVideoSlot();
   }
   // Show slot
-  this._slot.style.display = 'block';
+  this._ownSlot.style.display = 'block';
 };
 AdsManager.prototype.hideSlot = function() {
   // Hide slot
-  this._slot.style.display = 'none';
+  this._ownSlot.style.display = 'none';
 };
 AdsManager.prototype.resizeSlot = function(width, height) {
-  this._slot.style.width = width + 'px';
-  this._slot.style.height = height + 'px';
+  this._ownSlot.style.width = width + 'px';
+  this._ownSlot.style.height = height + 'px';
 };
 AdsManager.prototype.createVideoSlot = function() {
   this._videoSlot = document.createElement('video');
@@ -244,7 +247,16 @@ AdsManager.prototype.createVideoSlot = function() {
   }
 
   //this._adContainer.appendChild(this._videoSlot);
-  this._slot.appendChild(this._videoSlot);
+  this._ownSlot.appendChild(this._videoSlot);
+};
+AdsManager.prototype.createSlot = function() {
+  this._slot = document.createElement('div');
+  this._slot.style.position = 'absolute';
+  this._slot.style.top = '0px';
+  this._slot.style.left = '0px';
+  this._slot.style.right = '0px';
+  this._slot.style.bottom = '0px';
+  this._ownSlot.appendChild(this._slot);
 };
 AdsManager.prototype.hideVideoSlot = function() {
   console.log('hide video slot');
@@ -772,17 +784,23 @@ AdsManager.prototype.removeCreativeAsset = function() {
     this._vpaidIframe.parentNode.removeChild(this._vpaidIframe);
   }
 
-  // Remove 3rd-party HTML elements from the slot
-  console.log('remove 3rd-party HTML elements from the slot');
-  [...this._slot.children]
+  // Remove 3rd-party HTML elements from the own slot
+  console.log('remove 3rd-party HTML elements from the own slot');
+  [...this._ownSlot.children]
     .forEach(child => {
       console.log(child !== this._videoSlot);
-      child !== this._videoSlot ? this._slot.removeChild(child) : null
+      child !== this._videoSlot && child !== this._slot ? this._ownSlot.removeChild(child) : null
+    });
+  console.log('remove 3rd-party HTML elements from the slot');
+  // Remove 3rd-party HTML element from the slot
+  [...this._slot.children]
+    .forEach(child => {
+      this._slot.removeChild(child)
     });
 };
 AdsManager.prototype._removeHandlers = function() {
   // Remove event listeners from slot
-  this._slot.removeEventListener('click', this._handleSlotClick);
+  this._ownSlot.removeEventListener('click', this._handleSlotClick);
 
   // Remove event listeners from video slot
   this._videoSlot.removeEventListener('error', this._handleVideoSlotError, false);
@@ -966,7 +984,7 @@ AdsManager.prototype.init = function(width, height, viewMode, isNext = false) {
       } else {
 
         // VAST
-        this._slot.addEventListener('click', this._handleSlotClick);
+        this._ownSlot.addEventListener('click', this._handleSlotClick);
 
         // Ad video slot event listeners
         this._videoSlot.addEventListener('canplay', this._handleVideoSlotCanPlay);
@@ -1226,8 +1244,9 @@ AdsManager.prototype.destroy = function() {
   this.removeSlot();
 
   this._adContainer = null;
-  this._slot = null;
+  this._ownSlot = null;
   this._videoSlot = null;
+  this._slot = null;
 
   this._isDestroyed = true;
 
