@@ -26,7 +26,7 @@ module.exports = function(env, args) {
     output : {
       path: __dirname + (args.mode === 'production' ? '/dist' : '/public/js'),
       filename : 'ads-manager.js',
-      library: 'adserve'
+      //library: 'adserve'
     },
     plugins: plugins,
     optimization: {

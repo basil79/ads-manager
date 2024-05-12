@@ -1,8 +1,5 @@
 import AdsManager from './ads-manager.js';
 
-const tv = {
-  AdsManager
-}
-
-export { tv }
+window.adserve = window.adserve || {};
+window.adserve.AdsManager = AdsManager;
 

@@ -45,7 +45,7 @@
   var videoElement = document.getElementById('video-element');
 
   var adContainer = document.getElementById('ad-container');
-  var adsManager = new adserve.tv.AdsManager(adContainer);
+  var adsManager = new adserve.AdsManager(adContainer);
 
   console.log('AdsManager version is', adsManager.getVersion());
 
