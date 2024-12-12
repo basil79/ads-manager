@@ -2,7 +2,7 @@ import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
 import AdError from './ad-error';
 import Ad from './ad';
 
-const AdsManager = function(adContainer) {
+function AdsManager(adContainer) {
 
   if(!(adContainer && (adContainer instanceof HTMLElement
     || adContainer.getRootNode))) {
