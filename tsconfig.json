@@ -14,7 +14,8 @@
     // Types should go into this directory.
     // Removing this would place the .d.ts files
     // next to the .js files
-    "outDir": "dist",
+    //"outDir": "dist",
+    "outFile": "./dist/ads-manager.d.ts",
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
     //"declarationMap": true,
