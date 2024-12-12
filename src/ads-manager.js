@@ -10,6 +10,7 @@ function AdsManager(adContainer) {
   }
 
   // Ad Container
+  /** @private */
   this._adContainer = adContainer;
 
   // Own Slot

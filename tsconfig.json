@@ -6,6 +6,7 @@
     // Tells TypeScript to read JS files, as
     // normally they are ignored as source files
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     // Generate d.ts files
     "declaration": true,
     // This compiler run should
@@ -18,6 +19,8 @@
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
     //"declarationMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "checkJs": false,
+    "preserveWatchOutput": true
   }
 }

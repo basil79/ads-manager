@@ -2,7 +2,8 @@ export default AdsManager;
 declare function AdsManager(adContainer: any): void;
 declare class AdsManager {
     constructor(adContainer: any);
-    _adContainer: any;
+    /** @private */
+    private _adContainer;
     _ownSlot: HTMLDivElement;
     _videoSlot: HTMLVideoElement;
     _slot: HTMLDivElement;
