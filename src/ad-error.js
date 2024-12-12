@@ -4,6 +4,13 @@ export default class AdError {
   #message;
   #errorCode;
   #innerError;
+
+  /**
+   *
+   * @param {string} message
+   * @param {string} [errorCode]
+   * @param {Object} [innerError]
+   */
   constructor(message, errorCode, innerError) {
     this.#message = message;
     this.#errorCode = errorCode;

@@ -2,6 +2,14 @@ export default class Ad {
   #adId;
   #duration;
   #linear;
+
+  /**
+   *
+   * @param {Object} creative
+   * @param {string=} creative.adId
+   * @param {number=} creative.duration
+   * @param {string} creative.type
+   */
   constructor(creative) {
     this.#adId = creative.adId;
     this.#duration = creative.duration;

@@ -1,7 +1,13 @@
 export default class AdError {
-    constructor(message: any, errorCode: any, innerError: any);
-    getMessage(): any;
-    getErrorCode(): any;
+    /**
+     *
+     * @param {string} message
+     * @param {string} [errorCode]
+     * @param {Object} [innerError]
+     */
+    constructor(message: string, errorCode?: string, innerError?: any);
+    getMessage(): string;
+    getErrorCode(): string;
     getInnerError(): any;
     setInnerError(innerError: any): void;
     formatMessage(...values: any[]): this;
