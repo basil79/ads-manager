@@ -11,9 +11,21 @@ export default class Ad {
         duration?: number | undefined;
         type: string;
     });
+    /**
+     *
+     * @returns {string}
+     */
     getAdId(): string;
+    /**
+     *
+     * @returns {number}
+     */
     getDuration(): number;
     getMediaUrl(): any;
+    /**
+     *
+     * @returns {boolean}
+     */
     isLinear(): boolean;
     #private;
 }

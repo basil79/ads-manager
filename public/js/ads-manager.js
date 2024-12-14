@@ -1,6 +1,6 @@
 /*!
  * ads-manager v1.2.16 development
- * Updated : 2024-12-12
+ * Updated : 2024-12-14
  */
 /*
  * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
@@ -30,7 +30,7 @@ eval("!function(e,t){ true?t(exports):0}(this,(function(e){\"use strict\";functi
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ AdError)\n/* harmony export */ });\n/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ \"./src/utils.js\");\n\n\nclass AdError {\n  #message;\n  #errorCode;\n  #innerError;\n\n  /**\n   *\n   * @param {string} message\n   * @param {string} [errorCode]\n   * @param {Object} [innerError]\n   */\n  constructor(message, errorCode, innerError) {\n    this.#message = message;\n    this.#errorCode = errorCode;\n    this.#innerError = innerError;\n  }\n  getMessage() {\n    return this.#message;\n  }\n  getErrorCode() {\n    return this.#errorCode;\n  }\n  getInnerError() {\n    return this.#innerError instanceof Object ? this.#innerError : null;\n  }\n  setInnerError(innerError) {\n    this.#innerError = innerError\n  }\n  formatMessage(...values) {\n    this.#message = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.format)(this.#message, values);\n    return this;\n  }\n  toString() {\n    return 'AdError ' + this.getErrorCode() + ': ' + this.getMessage() + (null != this.getInnerError() ? ' Caused by: ' + this.getInnerError() : '');\n  }\n}\n\n\n//# sourceURL=webpack://ads-manager/./src/ad-error.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ AdError)\n/* harmony export */ });\n/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ \"./src/utils.js\");\n\n\nclass AdError {\n  #message;\n  #errorCode;\n  #innerError;\n\n  /**\n   *\n   * @param {string} message\n   * @param {number} [errorCode]\n   * @param {Object} [innerError]\n   */\n  constructor(message, errorCode, innerError) {\n    this.#message = message;\n    this.#errorCode = errorCode;\n    this.#innerError = innerError;\n  }\n\n  /**\n   *\n   * @returns {string}\n   */\n  getMessage() {\n    return this.#message;\n  }\n\n  /**\n   *\n   * @returns {number}\n   */\n  getErrorCode() {\n    return this.#errorCode;\n  }\n  getInnerError() {\n    return this.#innerError instanceof Object ? this.#innerError : null;\n  }\n  setInnerError(innerError) {\n    this.#innerError = innerError\n  }\n  formatMessage(...values) {\n    this.#message = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.format)(this.#message, values);\n    return this;\n  }\n  toString() {\n    return 'AdError ' + this.getErrorCode() + ': ' + this.getMessage() + (null != this.getInnerError() ? ' Caused by: ' + this.getInnerError() : '');\n  }\n}\n\n\n//# sourceURL=webpack://ads-manager/./src/ad-error.js?");
 
 /***/ }),
 
@@ -41,7 +41,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ Ad)\n/* harmony export */ });\nclass Ad {\n  #adId;\n  #duration;\n  #linear;\n\n  /**\n   *\n   * @param {Object} creative\n   * @param {string=} creative.adId\n   * @param {number=} creative.duration\n   * @param {string} creative.type\n   */\n  constructor(creative) {\n    this.#adId = creative.adId;\n    this.#duration = creative.duration;\n    this.#linear = creative.type === 'linear' ? true : false;\n  }\n  getAdId() {\n    return this.#adId;\n  }\n  getDuration() {\n    return this.#duration;\n  }\n  getMediaUrl() {\n    return null;\n  }\n  isLinear() {\n    return this.#linear;\n  }\n}\n\n\n//# sourceURL=webpack://ads-manager/./src/ad.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ Ad)\n/* harmony export */ });\nclass Ad {\n  #adId;\n  #duration;\n  #linear;\n\n  /**\n   *\n   * @param {Object} creative\n   * @param {string=} creative.adId\n   * @param {number=} creative.duration\n   * @param {string} creative.type\n   */\n  constructor(creative) {\n    this.#adId = creative.adId;\n    this.#duration = creative.duration;\n    this.#linear = creative.type === 'linear' ? true : false;\n  }\n\n  /**\n   *\n   * @returns {string}\n   */\n  getAdId() {\n    return this.#adId;\n  }\n\n  /**\n   *\n   * @returns {number}\n   */\n  getDuration() {\n    return this.#duration;\n  }\n  getMediaUrl() {\n    return null;\n  }\n\n  /**\n   *\n   * @returns {boolean}\n   */\n  isLinear() {\n    return this.#linear;\n  }\n}\n\n\n//# sourceURL=webpack://ads-manager/./src/ad.js?");
 
 /***/ }),
 

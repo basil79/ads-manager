@@ -15,15 +15,30 @@ export default class Ad {
     this.#duration = creative.duration;
     this.#linear = creative.type === 'linear' ? true : false;
   }
+
+  /**
+   *
+   * @returns {string}
+   */
   getAdId() {
     return this.#adId;
   }
+
+  /**
+   *
+   * @returns {number}
+   */
   getDuration() {
     return this.#duration;
   }
   getMediaUrl() {
     return null;
   }
+
+  /**
+   *
+   * @returns {boolean}
+   */
   isLinear() {
     return this.#linear;
   }

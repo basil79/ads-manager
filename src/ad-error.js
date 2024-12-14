@@ -8,7 +8,7 @@ export default class AdError {
   /**
    *
    * @param {string} message
-   * @param {string} [errorCode]
+   * @param {number} [errorCode]
    * @param {Object} [innerError]
    */
   constructor(message, errorCode, innerError) {
@@ -16,9 +16,19 @@ export default class AdError {
     this.#errorCode = errorCode;
     this.#innerError = innerError;
   }
+
+  /**
+   *
+   * @returns {string}
+   */
   getMessage() {
     return this.#message;
   }
+
+  /**
+   *
+   * @returns {number}
+   */
   getErrorCode() {
     return this.#errorCode;
   }
