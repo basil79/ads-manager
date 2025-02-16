@@ -764,6 +764,19 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
   this._vpaidIframe.style.width = '0px';
   this._vpaidIframe.style.height = '0px';
 
+  /*
+  // avoid document.write()
+  this._vpaidIframe.srcdoc = `<script>
+        function sendMessage(msg) {
+            var post = 'adm:${this._requestId}://' + JSON.stringify(msg);
+            window.parent.postMessage(post, '*');
+        }
+        </script>
+        <script type="text/javascript" onload="sendMessage('load')"
+            onerror="sendMessage('error')" src="${fileURL}"></script>
+    `;
+   */
+
   // Append iframe
   this._adContainer.appendChild(this._vpaidIframe);
 
@@ -781,7 +794,9 @@ AdsManager.prototype.removeCreativeAsset = function() {
   // Remove VPAID iframe
   console.log('remove vpaid iframe');
   if(this._vpaidIframe) {
-    this._vpaidIframe.parentNode.removeChild(this._vpaidIframe);
+    this._vpaidIframe.src ='about:blank'; // unload content
+    this._vpaidIframe.onload = null; // remove event listeners
+    this._vpaidIframe.parentNode.removeChild(this._vpaidIframe); // remove from DOM
   }
 
   // Remove 3rd-party HTML elements from the own slot

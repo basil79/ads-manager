@@ -1,6 +1,6 @@
 {
   "name": "ads-manager",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "description": "HTML5 Video Ads Manager based on @dailymotion/vast-client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
