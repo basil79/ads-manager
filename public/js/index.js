@@ -93,7 +93,7 @@
 
   });
   adsManager.addEventListener('AdLoaded', function(adEvent) {
-    console.log('AdLoaded > ad type is', adEvent.isLinear());
+    console.log('AdLoaded > ad type is linear?', adEvent.isLinear());
     appendEvent('AdLoaded');
     //if(adEvent.type === 'linear') {
     if(adEvent.isLinear()) {
@@ -107,9 +107,68 @@
       console.log('ADM > AdLoaded > ad is not linear');
     }
   });
-  adsManager.addEventListener('AdStarted', function() {
-    console.log('AdStarted');
+
+
+  function renderCompanionAd(target, html, width, height) {
+    const iframe = document.createElement('iframe');
+    iframe.width = width || '100%';
+    iframe.height = height || '100%';
+    iframe.scrolling = 'no';
+    iframe.marginWidth = '0';
+    iframe.marginHeight = '0';
+    iframe.frameBorder = '0';
+    iframe.tabIndex = 0;
+    iframe.style.border = '0';
+    iframe.style.verticalAlign = 'bottom';
+    iframe.src = 'about:blank';
+    target.appendChild(iframe);
+    //debugger
+
+    iframe.contentDocument.body.appendChild(html);
+
+    /*
+    iframe.contentWindow.document.open();
+    iframe.contentWindow.document.write(html);
+    iframe.contentWindow.document.close();
+     */
+  }
+  function clearCompanionAds() {
+    const c = document.getElementsByClassName('companion-ad');
+    for(let i = 0; i < c.length; i++) {
+      c[i].innerHTML = ''
+    }
+  }
+
+
+  adsManager.addEventListener('AdStarted', function(adEvent) {
+    console.log('AdStarted', adEvent);
     appendEvent('AdStarted');
+
+    // Companion Ads
+    var companionAds = adEvent.getCompanionAds(); // adEvent.getCompanionAds(300, 250);
+    companionAds.forEach((companion) => {
+      console.log('companion ad', companion.getContent());
+      // get placement
+      var placement = document.getElementById(`companion-ad-${companion.getWidth()}-${companion.getHeight()}`);
+      if(placement) {
+        renderCompanionAd(placement, companion.getContent(), companion.getWidth(), companion.getHeight());
+      }
+    });
+    /*
+    if(companionAds.length) {
+
+      console.log('companion ads', companionAds);
+      var companionAd = companionAds[0];
+      console.log('companion ad is', companionAd);
+      // Get HTML content from the companion ad.
+      //var content = companionAd.getContent();
+      debugger
+      // Write the content to the companion ad slot.
+      var div = document.getElementById('companion-ad-300-250');
+      //div.innerHTML = content;
+
+    }
+     */
 
     // Pause
     console.log('CONTENT_PAUSE_REQUESTED > is video not paused?', !videoElement.paused)
@@ -288,6 +347,7 @@
 
     // Clear events
     clearEvents();
+    clearCompanionAds();
 
     var giveVastUrl = document.getElementById('vast-url-input').value;
 
@@ -295,7 +355,7 @@
       videoElement.play();
     }
 
-    adsManager.requestAds(giveVastUrl, { muted: true });
+    adsManager.requestAds(giveVastUrl, { muted: false });
   }
 
   testAdButton.addEventListener('click', function() {

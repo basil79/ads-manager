@@ -31,6 +31,54 @@
             width: 100%;
             height: 100%;
         }
+        .companion-ad {
+            border: 1px dashed black;
+            margin: 2px;
+        }
+        #companion-ad-300-250 {
+            width: 302px;
+            height: 252px;
+        }
+        #companion-ad-320-180 {
+            width: 322px;
+            height: 182px;
+        }
+        #companion-ad-180-150 {
+            width: 182px;
+            height: 152px;
+        }
+        #companion-ad-300-60 {
+            width: 302px;
+            height: 62px;
+        }
+        #companion-ad-300-100 {
+            width: 302px;
+            height: 102px;
+        }
+        #companion-ad-320-50 {
+            width: 322px;
+            height: 52px;
+        }
+        #companion-ad-728-90 {
+            width: 730px;
+            height: 92px;
+        }
+        #companion-ad-540-82 {
+            width: 542px;
+            height: 84px;
+        }
+        #companion-ad-468-60 {
+            width: 470px;
+            height: 62px;
+        }
+        #companion-ad-300-600 {
+            width: 302px;
+            height: 602px;
+        }
+        #companion-ad-160-600 {
+            width: 162px;
+            height: 602px;
+        }
     </style>
 </head>
 <body>
@@ -51,9 +99,10 @@
 <br/>
 <br/>
 <h3>VAST Tag URL/XML Inspector (VAST, VPAID):</h3>
-<textarea id="vast-url-input">https://eyevinn.adtest.eyevinn.technology/api/v1/vast?dur=30</textarea>
+<textarea id="vast-url-input">https://basil79.github.io/vast-sample-tags/twe/vast.xml</textarea>
 <!-- https://v.adserve.tv/pg/vast-vpaid.xml -->
 <!-- https://vid.springserve.com/vast/184920?w=640&h=360 -->
+<!-- https://basil79.github.io/vast-sample-tags/companion-ads/vast.xml -->
 <button id="test-ad-button" class="primary-button">Test Ad</button>
 <button id="pause-ad-button" class="ad-button">Pause Ad</button>
 <!--<button id="resume-ad-button" class="ad-button">Resume Ad</button>-->
@@ -68,6 +117,22 @@
 <br/>
 <br/>
 <br/>
+<h3>Companions</h3>
+<!--<p>This page is served over HTTPS. Any companion resources not served over HTTPS may be blocked, preventing your companions from displaying.</p>-->
+<!--Set a companion ad div in html page. -->
+<div id="companion-ad-300-250" class="companion-ad"></div>
+<div id="companion-ad-320-180" class="companion-ad"></div>
+<div id="companion-ad-180-150" class="companion-ad"></div>
+<div id="companion-ad-300-60" class="companion-ad"></div>
+<div id="companion-ad-300-100" class="companion-ad"></div>
+<div id="companion-ad-320-50" class="companion-ad"></div>
+<div id="companion-ad-728-90" class="companion-ad"></div>
+<div id="companion-ad-540-82" class="companion-ad"></div>
+<div id="companion-ad-468-60" class="companion-ad"></div>
+<div id="companion-ad-300-600" class="companion-ad"></div>
+<div id="companion-ad-160-600" class="companion-ad"></div>
+
+<!--<div id="companion-ad-0-0" class="companion-ad"></div>-->
 
 <script src="js/ads-manager.js?v=23"></script>
 <script src="js/index.js?v=22"></script>
