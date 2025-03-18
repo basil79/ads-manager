@@ -79,6 +79,18 @@
             width: 162px;
             height: 602px;
         }
+
+        /* scalable */
+        #companion-ad-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+
+            background-color: transparent;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -92,6 +104,12 @@
             <source src="https://storage.googleapis.com/interactive-media-ads/media/android.webm"></source>-->
         </video>
         <div id="ad-container"></div>
+
+        <!-- placement -->
+        <div id="companion-ad-wrapper">
+            <div id="companion-ad-container"></div>
+        </div>
+
     </div>
 </div>
 
@@ -135,6 +153,9 @@
 <!--<div id="companion-ad-0-0" class="companion-ad"></div>-->
 
 <script src="js/ads-manager.js?v=23"></script>
+
+<script src="js/scalable-placement.js?v=2"></script>
+
 <script src="js/index.js?v=22"></script>
 
 

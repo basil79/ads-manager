@@ -1,5 +1,93 @@
 (function() {
 
+
+
+  // scalable placement
+  const sizes = [
+    /*{width: 120, height: 60},
+    {width: 234, height: 60},
+    {width: 300, height: 50},
+    {width: 320, height: 50},
+    {width: 468, height: 60},*/
+    // new sizes
+    {width: 200, height: 200},
+    {width: 250, height: 250},
+    {width: 300, height: 250}, // scale, rectangle
+    {width: 336, height: 280}, // scale
+    /*{width: 580, height: 400}, // scale*/
+    {width: 970, height: 250}, // scale, leaderboard
+    {width: 728, height: 90}, // scale,
+    {width: 930, height: 180}, // scale,
+    {width: 970, height: 90}, // scale,
+    {width: 980, height: 120}, // scale,*/
+  ];
+
+  // sort sizes
+  sizes.sort((a, b) => {
+    let aArea = a.width * a.height;
+    let bArea = b.width * b.height;
+    // compare the area of each
+    return bArea - aArea;
+  });
+
+  const uniqueSizes = new Map();
+  sizes.forEach((s) => {
+    uniqueSizes.set(s.width + 'x' + s.height, s)
+  });
+
+  console.log('sizes', sizes);
+
+  var companioAdWrapper = document.getElementById('companion-ad-wrapper');
+  function showCompanionAd() {
+    companioAdWrapper.style.backgroundColor = '#000';
+    companioAdWrapper.style.zIndex = '10';
+    companioAdWrapper.style.pointerEvents = 'all';
+  }
+  function hideCompanionAd() {
+    companioAdWrapper.style.backgroundColor = 'transparent';
+    companioAdWrapper.style.zIndex = null;
+    companioAdWrapper.style.pointerEvents = 'none';
+  }
+
+  var companionAdContainer = document.getElementById('companion-ad-container');
+  var scalablePlacement = new ScalablePlacement(companionAdContainer);
+
+
+
+
+  function renderCompanionAd(target, html, width, height) {
+    const iframe = document.createElement('iframe');
+    iframe.width = width || '100%';
+    iframe.height = height || '100%';
+    iframe.scrolling = 'no';
+    iframe.marginWidth = '0';
+    iframe.marginHeight = '0';
+    iframe.frameBorder = '0';
+    iframe.tabIndex = 0;
+    iframe.style.border = '0';
+    iframe.style.verticalAlign = 'bottom';
+    iframe.src = 'about:blank';
+    target.appendChild(iframe);
+    //debugger
+
+    iframe.contentDocument.body.appendChild(html);
+
+    /*
+    iframe.contentWindow.document.open();
+    iframe.contentWindow.document.write(html);
+    iframe.contentWindow.document.close();
+     */
+  }
+
+  function clearCompanionAds() {
+    const c = document.getElementsByClassName('companion-ad');
+    for(let i = 0; i < c.length; i++) {
+      c[i].innerHTML = ''
+    }
+  }
+
+
+
   var playContentButton = document.getElementById('play-content-button');
   var testAdButton = document.getElementById('test-ad-button');
 
@@ -107,47 +195,32 @@
       console.log('ADM > AdLoaded > ad is not linear');
     }
   });
-
-
-  function renderCompanionAd(target, html, width, height) {
-    const iframe = document.createElement('iframe');
-    iframe.width = width || '100%';
-    iframe.height = height || '100%';
-    iframe.scrolling = 'no';
-    iframe.marginWidth = '0';
-    iframe.marginHeight = '0';
-    iframe.frameBorder = '0';
-    iframe.tabIndex = 0;
-    iframe.style.border = '0';
-    iframe.style.verticalAlign = 'bottom';
-    iframe.src = 'about:blank';
-    target.appendChild(iframe);
-    //debugger
-
-    iframe.contentDocument.body.appendChild(html);
-
-    /*
-    iframe.contentWindow.document.open();
-    iframe.contentWindow.document.write(html);
-    iframe.contentWindow.document.close();
-     */
-  }
-  function clearCompanionAds() {
-    const c = document.getElementsByClassName('companion-ad');
-    for(let i = 0; i < c.length; i++) {
-      c[i].innerHTML = ''
-    }
-  }
-
-
   adsManager.addEventListener('AdStarted', function(adEvent) {
     console.log('AdStarted', adEvent);
     appendEvent('AdStarted');
 
     // Companion Ads
-    var companionAds = adEvent.getCompanionAds(); // adEvent.getCompanionAds(300, 250);
+    // sort companion ads by area
+    var companionAds = adEvent.getCompanionAds().sort((a, b) => {
+      let aArea = a.getWidth() * a.getHeight();
+      let bArea = b.getWidth() * b.getHeight();
+      return bArea - aArea;
+    }); // adEvent.getCompanionAds(300, 250);
+
+    console.log('companionAds sorted', companionAds);
+    var companionAd = null;
+    // list
     companionAds.forEach((companion) => {
       console.log('companion ad', companion.getContent());
+
+      if(!companionAd && uniqueSizes.has(companion.getWidth() + 'x' + companion.getHeight())) {
+        companionAd = companion;
+        // render ad through scalable placement
+        scalablePlacement.renderAd(companionAd.getContent(), companionAd.getWidth(), companionAd.getHeight());
+        showCompanionAd();
+      }
+
+
       // get placement
       var placement = document.getElementById(`companion-ad-${companion.getWidth()}-${companion.getHeight()}`);
       if(placement) {
@@ -244,6 +317,13 @@
     console.log('AllAdsCompleted');
     appendEvent('AllAdsCompleted');
     isAdPaused = false;
+
+    // companion ads
+    // TODO: scalable placement, destroy ad
+    if(scalablePlacement) {
+      scalablePlacement.destroyAd();
+      hideCompanionAd();
+    }
 
     console.log('CONTENT_RESUME_REQUESTED')
     // Resume player
