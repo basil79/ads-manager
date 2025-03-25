@@ -760,6 +760,11 @@ AdsManager.prototype.loadCreativeAsset = function(fileURL) {
 
   // Create iframe
   this._vpaidIframe = document.createElement('iframe');
+  // Sandbox
+  this._vpaidIframe.setAttribute(
+    'sandbox',
+    'allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation'
+  );
   this._vpaidIframe.style.display = 'none';
   this._vpaidIframe.style.width = '0px';
   this._vpaidIframe.style.height = '0px';
