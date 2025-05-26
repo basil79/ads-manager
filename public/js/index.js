@@ -2,41 +2,6 @@
 
 
 
-  // scalable placement
-  const sizes = [
-    /*{width: 120, height: 60},
-    {width: 234, height: 60},
-    {width: 300, height: 50},
-    {width: 320, height: 50},
-    {width: 468, height: 60},*/
-    // new sizes
-    {width: 200, height: 200},
-    {width: 250, height: 250},
-    {width: 300, height: 250}, // scale, rectangle
-    {width: 336, height: 280}, // scale
-    /*{width: 580, height: 400}, // scale*/
-    {width: 970, height: 250}, // scale, leaderboard
-    {width: 728, height: 90}, // scale,
-    {width: 930, height: 180}, // scale,
-    {width: 970, height: 90}, // scale,
-    {width: 980, height: 120}, // scale,*/
-  ];
-
-  // sort sizes
-  sizes.sort((a, b) => {
-    let aArea = a.width * a.height;
-    let bArea = b.width * b.height;
-    // compare the area of each
-    return bArea - aArea;
-  });
-
-  const uniqueSizes = new Map();
-  sizes.forEach((s) => {
-    uniqueSizes.set(s.width + 'x' + s.height, s)
-  });
-
-  console.log('sizes', sizes);
-
   var companioAdWrapper = document.getElementById('companion-ad-wrapper');
   function showCompanionAd() {
     companioAdWrapper.style.backgroundColor = '#000';
@@ -56,6 +21,7 @@
 
 
   function renderCompanionAd(target, html, width, height) {
+    console.log('render companion ad')
     const iframe = document.createElement('iframe');
     iframe.width = width || '100%';
     iframe.height = height || '100%';
@@ -70,16 +36,15 @@
     target.appendChild(iframe);
     //debugger
 
-    iframe.contentDocument.body.appendChild(html);
-
-    /*
     iframe.contentWindow.document.open();
     iframe.contentWindow.document.write(html);
     iframe.contentWindow.document.close();
-     */
+
+
   }
 
   function clearCompanionAds() {
+    console.log('clear companion ads')
     const c = document.getElementsByClassName('companion-ad');
     for(let i = 0; i < c.length; i++) {
       c[i].innerHTML = ''
@@ -199,49 +164,78 @@
     console.log('AdStarted', adEvent);
     appendEvent('AdStarted');
 
-    // Companion Ads
-    // sort companion ads by area
-    var companionAds = adEvent.getCompanionAds().sort((a, b) => {
-      let aArea = a.getWidth() * a.getHeight();
-      let bArea = b.getWidth() * b.getHeight();
+
+
+    // available sizes
+    const sizes = [
+      /*{width: 120, height: 60},
+      {width: 234, height: 60},
+      {width: 300, height: 50},
+      {width: 320, height: 50},
+      {width: 468, height: 60},*/
+      // new sizes
+      {width: 200, height: 200},
+      {width: 250, height: 250},
+      {width: 256, height: 256}, // TODO: remove
+      {width: 300, height: 250}, // scale, rectangle
+      {width: 336, height: 280}, // scale
+      /*{width: 580, height: 400}, // scale*/
+      {width: 970, height: 250}, // scale, leaderboard
+      {width: 728, height: 90}, // scale,
+      {width: 930, height: 180}, // scale,
+      {width: 970, height: 90}, // scale,
+      {width: 980, height: 120}, // scale,*/
+    ];
+
+    // sort sizes by area
+    sizes.sort((a, b) => {
+      let aArea = a.width * a.height;
+      let bArea = b.width * b.height;
+      // compare the area of each
       return bArea - aArea;
-    }); // adEvent.getCompanionAds(300, 250);
+    });
 
-    console.log('companionAds sorted', companionAds);
+
+    // get list of companion ads
+    var companionAds = adEvent.getCompanionAds();
+
+
     var companionAd = null;
-    // list
-    companionAds.forEach((companion) => {
-      console.log('companion ad', companion.getContent());
 
-      if(!companionAd && uniqueSizes.has(companion.getWidth() + 'x' + companion.getHeight())) {
-        companionAd = companion;
-        // render ad through scalable placement
-        scalablePlacement.renderAd(companionAd.getContent(), companionAd.getWidth(), companionAd.getHeight());
-        showCompanionAd();
+    function getCompanionBySize(size) {
+      for(var i = 0; i < companionAds.length; i++) {
+        if(companionAds[i].getWidth() == size.width && companionAds[i].getHeight() == size.height) {
+          return companionAds[i];
+        }
       }
+    }
+    // find compatible ad
+    for(var i = 0; i < sizes.length; i++) {
+      companionAd = getCompanionBySize(sizes[i]);
+      if(companionAd) {
+        break
+      }
+    }
+
+    console.log('companion ad', companionAd);
+    if(companionAd) {
+      // render ad through scalable placement
+      scalablePlacement.renderAd(companionAd.getContent(), companionAd.getWidth(), companionAd.getHeight());
+      showCompanionAd();
+    }
 
 
+    // list and render rest
+    companionAds.forEach((companion) => {
       // get placement
       var placement = document.getElementById(`companion-ad-${companion.getWidth()}-${companion.getHeight()}`);
       if(placement) {
         renderCompanionAd(placement, companion.getContent(), companion.getWidth(), companion.getHeight());
       }
     });
-    /*
-    if(companionAds.length) {
+    // end companion ads
 
-      console.log('companion ads', companionAds);
-      var companionAd = companionAds[0];
-      console.log('companion ad is', companionAd);
-      // Get HTML content from the companion ad.
-      //var content = companionAd.getContent();
-      debugger
-      // Write the content to the companion ad slot.
-      var div = document.getElementById('companion-ad-300-250');
-      //div.innerHTML = content;
 
-    }
-     */
 
     // Pause
     console.log('CONTENT_PAUSE_REQUESTED > is video not paused?', !videoElement.paused)
@@ -428,6 +422,11 @@
     // Clear events
     clearEvents();
     clearCompanionAds();
+
+    if(scalablePlacement) {
+      scalablePlacement.destroyAd();
+      hideCompanionAd();
+    }
 
     var giveVastUrl = document.getElementById('vast-url-input').value;
 

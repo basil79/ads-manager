@@ -98,7 +98,9 @@ class ScalablePlacement {
     slot.appendChild(iframe);
     //debugger
 
-    iframe.contentDocument.body.appendChild(html);
+    iframe.contentWindow.document.open();
+    iframe.contentWindow.document.write(html);
+    iframe.contentWindow.document.close();
 
     // Update currentAd
     this.#currentAd = {

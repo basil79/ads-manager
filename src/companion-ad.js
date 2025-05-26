@@ -83,7 +83,7 @@ CompanionAd.prototype.getContent = function() {
     });
   }
 
-  return adContent;
+  return adContent.outerHTML;
 };
 
 export default CompanionAd;
