@@ -40,7 +40,6 @@
     iframe.contentWindow.document.write(html);
     iframe.contentWindow.document.close();
 
-
   }
 
   function clearCompanionAds() {
