@@ -334,7 +334,7 @@ AdsManager.prototype.onAdLoaded = function() {
   this._hasLoaded = true;
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
-    this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._creative));
+    this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._ad));
   }
 };
 AdsManager.prototype.onAdDurationChange = function() {
@@ -351,7 +351,10 @@ AdsManager.prototype.onAdSizeChange = function() {
 };
 AdsManager.prototype.onAdStarted = function() {
   this._hasStarted = true;
-  this._callEvent(this.EVENTS.AdStarted);
+  //this._callEvent(this.EVENTS.AdStarted);
+  if (this.EVENTS.AdStarted in this._eventCallbacks) {
+    this._eventCallbacks[this.EVENTS.AdStarted](new Ad(this._ad));
+  }
 };
 AdsManager.prototype.onAdVideoStart = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
@@ -614,6 +617,16 @@ AdsManager.prototype.canPlayVideoType = function(mimeType) {
     return true;
   } else if(mimeType === 'video/mp4' && this.supportsH264BaselineVideo()) {
     return true;
+  } else if(mimeType === 'audio/mpeg' && this.supportsMpegAudio()) {
+    return true;
+  } else if(mimeType === 'audio/acc' && this.supportsAccAudio()) {
+    return true;
+  } else if(mimeType === 'audio/wav' && this.supportsWavAudio()) {
+    return true;
+  } else if(mimeType === 'audio/ogg' && this.supportsOgaAudio()) {
+    return true;
+  } else if(mimeType === 'audio/mp4' && this.supportsMP4Audio()) {
+    return true;
   }
   return false;
 };
@@ -635,6 +648,26 @@ AdsManager.prototype.supportsWebmVideo = function() {
 AdsManager.prototype.supportsThreeGPVideo = function() {
   if(!this.supportsVideo()) return false;
   return document.createElement('video').canPlayType('video/3gpp; codecs="mp4v.20.8, samr"');
+};
+AdsManager.prototype.supportsMpegAudio = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('audio/mpeg');
+};
+AdsManager.prototype.supportsAccAudio = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('audio/acc');
+};
+AdsManager.prototype.supportsOgaAudio = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('audio/ogg');
+};
+AdsManager.prototype.supportsWavAudio = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('audio/wav');
+};
+AdsManager.prototype.supportsMP4Audio = function() {
+  if(!this.supportsVideo()) return false;
+  return document.createElement('video').canPlayType('audio/mp4');
 };
 AdsManager.prototype.handshakeVersion = function(version) {
   return this._vpaidCreative.handshakeVersion(version);
@@ -900,7 +933,7 @@ AdsManager.prototype._processAd = function(isNext = false) {
     if(this._creative.mediaFiles.length != 0) {
       // Filter and check media files for mime type canPlay and if VPAID or not
       this._mediaFiles = this._creative.mediaFiles.filter(mediaFile => {
-        // mime types -> mp4, webm, ogg, 3gp
+        // mime types -> video: mp4, webm, ogg, 3gp
         if(this.canPlayVideoType(mediaFile.mimeType)) {
           return mediaFile;
         } else if(mediaFile.mimeType === 'application/javascript') {
