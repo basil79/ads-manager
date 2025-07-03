@@ -18,8 +18,6 @@
   var scalablePlacement = new ScalablePlacement(companionAdContainer);
 
 
-
-
   function renderCompanionAd(target, html, width, height) {
     console.log('render companion ad')
     const iframe = document.createElement('iframe');

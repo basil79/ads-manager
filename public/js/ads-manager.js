@@ -1,6 +1,6 @@
 /*!
  * ads-manager v1.2.18 development
- * Updated : 2025-05-27
+ * Updated : 2025-07-03
  */
 /*
  * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
