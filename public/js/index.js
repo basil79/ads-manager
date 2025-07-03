@@ -1,7 +1,6 @@
 (function() {
 
-
-
+  /*
   var companioAdWrapper = document.getElementById('companion-ad-wrapper');
   function showCompanionAd() {
     companioAdWrapper.style.backgroundColor = '#000';
@@ -16,6 +15,7 @@
 
   var companionAdContainer = document.getElementById('companion-ad-container');
   var scalablePlacement = new ScalablePlacement(companionAdContainer);
+   */
 
 
   function renderCompanionAd(target, html, width, height) {
@@ -214,11 +214,13 @@
     }
 
     console.log('companion ad', companionAd);
+    /*
     if(companionAd && vastUrl.indexOf('ads.benefit-ads.com') !==-1) {
       // render ad through scalable placement
       scalablePlacement.renderAd(companionAd.getContent(), companionAd.getWidth(), companionAd.getHeight());
       showCompanionAd();
     }
+     */
 
 
     // list and render rest
@@ -308,12 +310,12 @@
     appendEvent('AllAdsCompleted');
     isAdPaused = false;
 
-    // companion ads
-    // TODO: scalable placement, destroy ad
+    /*
     if(scalablePlacement) {
       scalablePlacement.destroyAd();
       hideCompanionAd();
     }
+     */
 
     console.log('CONTENT_RESUME_REQUESTED')
     // Resume player
@@ -419,10 +421,12 @@
     clearEvents();
     clearCompanionAds();
 
+    /*
     if(scalablePlacement) {
       scalablePlacement.destroyAd();
       hideCompanionAd();
     }
+     */
 
     vastUrl = document.getElementById('vast-url-input').value;
 
