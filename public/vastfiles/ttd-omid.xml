@@ -1,0 +1,59 @@
+<VAST version="2.0">
+    <Ad id="bed4f433-a0ed-436a-8747-76af0e324567">
+        <Wrapper>
+            <AdSystem version="1.0">The Trade Desk</AdSystem>
+            <Extensions>
+                <Extension type="AdVerifications">
+                    <AdVerifications>
+                        <Verification vendor="integralads.com">
+                            <JavaScriptResource apiFramework="omid" browserOptional="true">
+                                <![CDATA[https://pixel.adsafeprotected.com/jload?anId=8095&pubId=187105&chanId=263455&campId=5455048&custom5=2&placementId=41006&dealId=392388&custom=717dae97-28ca-4672-877a-83a8275f955c&custom2=www.zerotackle.com&custom3=04&custom4=372x209&adsafe_par&impId=1]]>
+                            </JavaScriptResource>
+                        </Verification>
+                    </AdVerifications>
+                </Extension>
+            </Extensions>
+            <Impression></Impression>
+            <Impression>
+                <![CDATA[https://a4702.casalemedia.com/impression/v2/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?verifieD=1&userID=Zfp.y4sFVn4AAAYSAUZXTQAA&cmpro=5316&deviceType=4&expiryTime=1750564135&profileIDs=&creativeID=2008e7a&pubID=187105&format=video&channel=site&ee=3D]]>
+            </Impression>
+            <Impression>
+                <![CDATA[https://k8s1-event-tracker-sg.lb.indexww.com/event/ci?ad=15&bi=bed4f433-a0ed-436a-8747-76af0e324567&c=33590906&campid=5455048&cid=lw33vwsj&d=39&dab=www.zerotackle.com&di=392388&dt=4&ec=31&ee=21&f=2&i=dFutJ38B5vSrw48_emDS&p=187105&plcmt=1&pt=1&s=263455&tx=d1bmu5p6jdrt648aoto0]]>
+            </Impression>
+            <Creatives>
+                <Creative>
+                    <Linear>
+                        <TrackingEvents>
+                            <Tracking event="firstQuartile">
+                                <![CDATA[https://a4702.casalemedia.com/events/v1/3/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?]]>
+                            </Tracking>
+                            <Tracking event="midpoint">
+                                <![CDATA[https://a4702.casalemedia.com/events/v1/4/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?]]>
+                            </Tracking>
+                            <Tracking event="thirdQuartile">
+                                <![CDATA[https://a4702.casalemedia.com/events/v1/5/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?]]>
+                            </Tracking>
+                            <Tracking event="complete">
+                                <![CDATA[https://a4702.casalemedia.com/events/v1/6/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?]]>
+                            </Tracking>
+                            <Tracking event="complete">
+                                <![CDATA[https://k8s1-event-tracker-sg.lb.indexww.com/event/ci?ad=15&bi=bed4f433-a0ed-436a-8747-76af0e324567&c=33590906&campid=5455048&cid=lw33vwsj&d=39&dab=www.zerotackle.com&di=392388&dt=4&ec=6&f=2&i=dFutJ38B5vSrw48_emDS&p=187105&plcmt=1&pt=1&s=263455&tx=d1bmu5p6jdrt648aoto0]]>
+                            </Tracking>
+                        </TrackingEvents>
+                        <VideoClicks>
+                            <ClickTracking>
+                                <![CDATA[https://a4702.casalemedia.com/events/v1/1/263455/39/d1bmu5p6jdrt648aoto0/bed4f433-a0ed-436a-8747-76af0e324567?]]>
+                            </ClickTracking>
+                            <ClickTracking>
+                                <![CDATA[https://k8s1-event-tracker-sg.lb.indexww.com/event/ci?ad=15&bi=bed4f433-a0ed-436a-8747-76af0e324567&c=33590906&campid=5455048&cid=lw33vwsj&d=39&dab=www.zerotackle.com&di=392388&dt=4&ec=1&f=2&i=dFutJ38B5vSrw48_emDS&p=187105&plcmt=1&pt=1&s=263455&tx=d1bmu5p6jdrt648aoto0]]>
+                            </ClickTracking>
+                        </VideoClicks>
+                    </Linear>
+                </Creative>
+            </Creatives>
+            <VASTAdTagURI>
+                <![CDATA[https://vast.doubleverify.com/v3/vast?_media=3&ctx=818052&cmp=DV140326&sid=TTD&plc=vidview&advid=818053&adsrv=166&dvtagver=6.1.src&aucrtv=lw33vwsj&c5=www.zerotackle.com&DVP_PP_IMP_ID=deaca13c-cce8-42f8-90ca-b50365a3b27d&DVP_TTD_1=0b1zkvj&DVP_TTD_2=9iklp2m&DVP_TTD_3=hlx2wmh&DVP_TTD_4=pws4a08&DVP_TTD_6=casale&DVP_HAS_VIEW=0&_vast=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fvast%2F%3Ft%3D1%26iid%3Ddeaca13c-cce8-42f8-90ca-b50365a3b27d%26crid%3Dlw33vwsj%26wp%3DaFdvFwAAAAD_VuHfcf0eliwjJ-J8-akXePoAOQ%26aid%3D1%26wpc%3DUSD%26sfe%3D1a8eef17%26puid%3DZfp.y4sFVn4AAAYSAUZXTQAA%26bdc%3D14%26tdid%3Daaba3492-4a07-47c9-8e1e-1eeb32032768%26pid%3D0b1zkvj%26ag%3Dhlx2wmh%26adv%3D9iklp2m%26sig%3D1iPwyFZraAV46iLac_t5XHrhSPMRpUlNqp6Nhx0DjBrs.%26bp%3D18.058690744921%26cf%3D7731972%26fq%3D0%26td_s%3Dwww.zerotackle.com%26rcats%3Dtmc%26mste%3Dwww.zerotackle.com%26mfld%3D2%26mssi%3D%26mfsi%3D%26uhow%3D12%26agsa%3D%26rgz%3D2565%26svbttd%3D1%26dt%3DMobile%26osf%3DAndroid%26os%3DAndroid140%26br%3DChrome%26rlangs%3Den%26mlang%3D%26svpid%3D187105%26did%3DINTERPLAYFEDGOVVIDEOTTD-P1824%26rcxt%3DOther%26lat%3D-34.010000%26lon%3D150.870000%26tmpc%3D12.830000000000041%26daid%3D%26vp%3D0%26osi%3D%26osv%3D%26bv%3D1%26mk%3DSamsung%26mdl%3DSM-A736B%26testid%3Diavc1%2520%26vpb%3DPreRoll%26dc%3D14%26vcc%3DEMgBGMgBMggIAggFCAkIBjoECAEIAkABSAFQAogBAqAB9AKoAdEByAEB0AED6AEC8AEB-AEBgAIDigIICAIIAwgFCAaaAgYIAQgCCAegAgKoAgGwAgC4AgDAAgHYAgDgAgD1AgAAAAA.%26sv%3Dcasale%26pidi%3D3053%26advi%3D180303%26cmpi%3D4481935%26agi%3D22209226%26cridi%3D38939897%26svi%3D8%26tid%3D1%26cmp%3Dpws4a08%26vrtd%3D14%2C15%26rurl%3Dhttps%253a%252f%252fwww.zerotackle.com%252fknights-forward-rejects-extension-set-to-test-open-market-223390%252f%26tsig%3D1T6WQB2tPZTqsdwhS3kaSm-ZfgIGykdlJ-g1_-Lrz6k.%26cc%3D1~KLUv_WNa1XJFNQAdCAADDzo9VgQQsQTyPIE8MEjBhX1aM4ma6ZSWrxtVfNhQ06KIoSCBL2wVJwSsbBUqBKD4Aaj8AEQRBuwQBtiFDbBuGADFFbLuH0DnClu4f8CQLwDPTKwnoI0XAMUHgNQLkId0yrUbHAwMcPUBhrBbd75XmLZ2v5WE3QrS28rR00LFaoHyWpjYPFqQemG0EGHtWnnee5-VxmdZfRaU1so1K0iWjtbKFQvVTwjfcX1YijwWFBYrCQuEogXM0RNmuf-nqueDxPru_IfU_rxee-c54HpVqYFrjBV0w0wWu02zJ0kBMFR9MDkKc8UDlgE4B_zHijd0gRcNyANLE7cv1eubXAfaa2YO%26dur%3D1~KLUv_WMFoCgk5wCNBQBDhxgRXECFsb1ydnJu7yP00WOY-aXwdppCmenUW2uW1ExO-ulF1P3XJnnhBYCTdj5AU72Vk0mWeAvw4Rk8xTLoTU0EmCSG5wDYqyt5LlJIS0tOWnK2bPFxeSSiKaOaaVD4iNJJNxz8UH-lmAiX1KceHyymoQ6BSriofJbafBV1ihttla1BLhKHPqFKEmMO8Xv2iwLGFK6A5SW-AfwYfHqvomCiQC3uQGYhIVy5H29s-AY.%26durs%3D9mn96H%26crrelr%3D%26vc%3D12%26said%3D717dae97-28ca-4672-877a-83a8275f955c_x27%26ict%3DUnknown%26auct%3D3%26im%3D1%26mc%3D520d34f5-fc5d-47ff-86ff-08a5f9d604ad%26ev%3DwVz-1ayv8GeWEvSHwN2ik9-4mu2aFs9VVfr7IjcAIts.%26rsv%3D0.000166045972688215%26abr%3D62f325bb-eec2-4812-b05c-71b7d4980a4e%26tail%3D1%26vrw%3D1&rtsurl=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fdv%2F%3Frtb%3DdD0xJmlpZD1kZWFjYTEzYy1jY2U4LTQyZjgtOTBjYS1iNTAzNjVhM2IyN2QmY3JpZD1sdzMzdndzaiZ3cD0ke0FVQ1RJT05fUFJJQ0U6SUVYfSZhaWQ9MSZ3cGM9VVNEJnNmZT0xYThlZWYxNyZwdWlkPVpmcC55NHNGVm40QUFBWVNBVVpYVFFBQSZiZGM9MTQmdGRpZD1hYWJhMzQ5Mi00YTA3LTQ3YzktOGUxZS0xZWViMzIwMzI3NjgmcGlkPTBiMXprdmomYWc9aGx4MndtaCZhZHY9OWlrbHAybSZicD0xOC4wNTg2OTA3NDQ5MjEmY2Y9NzczMTk3MiZmcT0wJnRkX3M9d3d3Lnplcm90YWNrbGUuY29tJnJjYXRzPXRtYyZtc3RlPXd3dy56ZXJvdGFja2xlLmNvbSZtZmxkPTImbXNzaT0mbWZzaT0mdWhvdz0xMiZhZ3NhPSZyZ3o9MjU2NSZzdmJ0dGQ9MSZkdD1Nb2JpbGUmb3NmPUFuZHJvaWQmb3M9QW5kcm9pZDE0MCZicj1DaHJvbWUmcmxhbmdzPWVuJm1sYW5nPSZzdnBpZD0xODcxMDUmZGlkPUlOVEVSUExBWUZFREdPVlZJREVPVFRELVAxODI0JnJjeHQ9T3RoZXImbGF0PS0zNC4wMTAwMDAmbG9uPTE1MC44NzAwMDAmdG1wYz0xMi44MzAwMDAwMDAwMDAwNDEmZGFpZD0mdnA9MCZvc2k9Jm9zdj0mYnY9MSZtaz1TYW1zdW5nJm1kbD1TTS1BNzM2QiZ0ZXN0aWQ9aWF2YzElMjAmdnBiPVByZVJvbGwmY2M9MX5LTFV2X1dOYTFYSkZOUUFkQ0FBRER6bzlWZ1FRc1FUeVBJRThNRWpCaFgxYU00bWE2WlNXcnh0VmZOaFEwNktJb1NDQkwyd1ZKd1NzYkJVcUJLRDRBYWo4QUVRUkJ1d1FCdGlGRGJCdUdBREZGYkx1SDBEbkNsdTRmOENRTHdEUFRLd25vSTBYQU1VSGdOUUxrSWQweXJVYkhBd01jUFVCaHJCYmQ3NVhtTFoydjVXRTNRclMyOHJSMDBMRmFvSHlXcGpZUEZxUWVtRzBFR0h0V25uZWU1LVZ4bWRaZlJhVTFzbzFLMGlXanRiS0ZRdlZUd2pmY1gxWWlqd1dGQllyQ1F1RW9nWE0wUk5tdWYtbnF1ZUR4UHJ1X0lmVV9yeGVlLWM1NEhwVnFZRnJqQlYwdzB3V3UwMnpKMGtCTUZSOU1Ea0tjOFVEbGdFNEJfekhpamQwZ1JjTnlBTkxFN2N2MWV1YlhBZmFhMllPJmR1cj0xfktMVXZfV01Gb0NnazV3Q05CUUJEaHhnUlhFQ0ZzYjF5ZG5KdTd5UDAwV09ZLWFYd2RwcENtZW5VVzJ1VzFFeE8tdWxGMVAzWEpubmhCWUNUZGo1QVU3MlZrMG1XZUF2dzRSazh4VExvVFUwRW1DU0c1d0RZcXl0NUxsSklTMHRPV25LMmJQRnhlU1NpS2FPYWFWRDRpTkpKTnh6OFVILWxtQWlYMUtjZUh5eW1vUTZCU3Jpb2ZKYmFmQlYxaWh0dGxhMUJMaEtIUHFGS0VtTU84WHYyaXdMR0ZLNkE1U1ctQWZ3WWZIcXZvbUNpUUMzdVFHWWhJVnk1SDI5cy1BWS4mY3JyZWxyPSZ2Yz0xMiZzYWlkPTcxN2RhZTk3LTI4Y2EtNDY3Mi04NzdhLTgzYTgyNzVmOTU1Y194MjcmaWN0PVVua25vd24mYXVjdD0zJmltPTEmbWM9NTIwZDM0ZjUtZmM1ZC00N2ZmLTg2ZmYtMDhhNWY5ZDYwNGFkJmV2PXdWei0xYXl2OEdlV0V2U0h3TjJpazktNG11MmFGczlWVmZyN0lqY0FJdHMuJnJzdj0wLjAwMDE2NjA0NTk3MjY4ODIxNSZhYnI9NjJmMzI1YmItZWVjMi00ODEyLWIwNWMtNzFiN2Q0OTgwYTRlJnRhaWw9MSZzdj1jYXNhbGUmdGFpbD0x%26pie%3D&_api=[APIFRAMEWORKS]&_ssm=[SERVERSIDE]&gdpr=0&gdpr_consent=&gdpr_consent=[GDPRCONSENT]&_tsm=[TIMESTAMP]&_abm=[APPBUNDLE]&_pum=[PAGEURL]]]>
+            </VASTAdTagURI>
+        </Wrapper>
+    </Ad>
+</VAST>

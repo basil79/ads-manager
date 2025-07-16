@@ -1,6 +1,7 @@
 import { VASTClient, VASTParser, VASTTracker } from '@dailymotion/vast-client';
 import AdError from './ad-error';
 import Ad from './ad';
+import {loadScript} from './utils';
 
 const AdsManager = function(adContainer) {
 
@@ -96,8 +97,11 @@ const AdsManager = function(adContainer) {
     loadVideoTimeout: 8000,
     withCredentials: false,
     wrapperLimit: 10,
-    resolveAll: true
+    resolveAll: true,
+    pageUrl: null,
+    omid: null, // Open Measurement (OM) SDK, default null, { 'GOOGLE': 'FULL', 'OTHER': 'DOMAIN' }
   };
+
   // Error codes
   this.ERROR_CODES = {
     VAST_MALFORMED_RESPONSE:100,
@@ -184,6 +188,45 @@ const AdsManager = function(adContainer) {
   this._hasStarted = false;
 
   this._isDestroyed = false;
+
+  // OMID
+  // TODO: replace sources
+  this.OM_SDK_SRC = '/js/omweb-v1.js';
+  this.OM_SDK_SESSION_CLIENT_SRC = '/js/omid-session-client-v1.js';
+  this.OMID_PARTNER_NAME = 'Google1';
+  this.OMID_PARTNER_VERSION = '3.704.0';
+
+  this._omid = {
+    sessionClient: null,
+    partner: null,
+    resources: null,
+    context: null,
+    adSession: null,
+    isAdSessionStarted: false,
+    adEvents: null,
+    mediaEvents: null,
+  };
+
+  Promise
+    .all([
+      loadScript(this.OM_SDK_SRC, true),
+      loadScript(this.OM_SDK_SESSION_CLIENT_SRC, true)
+    ])
+    .then(() => {
+      try {
+        // Init OM SDK, create session client
+        this._omid.sessionClient = OmidSessionClient['default'];
+        console.log('OMID init > OM SDK session client', this._omid.sessionClient);
+        // Identify OMID integration
+        this._omid.partner = new this._omid.sessionClient.Partner(this.OMID_PARTNER_NAME, this.OMID_PARTNER_VERSION);
+        console.log('OMID', this._omid);
+      } catch (e) {
+        console.log('OMID > can\'t use OM SDK');
+      }
+    })
+    .catch((err) => {
+      console.log(`${this.OM_SDK_SRC} and ${this.OM_SDK_SESSION_CLIENT_SRC} are not loaded`, err);
+    });
 };
 AdsManager.prototype.createOwnSlot = function() {
   console.log('create slot......');
@@ -332,6 +375,13 @@ AdsManager.prototype.onAdsManagerLoaded = function() {
 };
 AdsManager.prototype.onAdLoaded = function() {
   this._hasLoaded = true;
+
+  // TODO: OMID handle ad event loaded
+  if(this._omid.isAdSessionStarted && this._omid.adEvents) {
+    console.log('OMID > adEvents.loaded');
+    this._omid.adEvents.loaded();
+  }
+
   this.stopVASTMediaLoadTimeout();
   if (this.EVENTS.AdLoaded in this._eventCallbacks) {
     this._eventCallbacks[this.EVENTS.AdLoaded](new Ad(this._ad));
@@ -360,12 +410,28 @@ AdsManager.prototype.onAdVideoStart = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
+
+  // TODO: OMID handle media event start
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    const duration = this.getDuration() ? Math.floor(this.getDuration()) : 0;
+    console.log('OMID > mediaEvent.start', duration, this.getVolume());
+    this._omid.mediaEvents.start(duration, this.getVolume());
+  }
+
   this._callEvent(this.EVENTS.AdVideoStart);
 };
 AdsManager.prototype.onAdStopped = function() {
+
   if(!this._hasStarted) {
     this.onAdError(this.ERRORS.VPAID_CREATIVE_ERROR);
   } else {
+
+    // TODO: OMID finish ad session
+    if(this._omid.isAdSessionStarted && this._omid.adSession) {
+      console.log('OMID > adSession.finish');
+      this._omid.adSession.finish();
+    }
+
     if(this._isAdPod && this._adPod.length != 0) {
 
       this._nextQuartileIndex = 0;
@@ -401,11 +467,34 @@ AdsManager.prototype.onAdStopped = function() {
   }
 };
 AdsManager.prototype.onAdSkipped = function() {
+
+  // TODO: OMID handle media event skipped and finish ad session
+  if(this._omid.isAdSessionStarted) {
+    // handle skipped
+    if(this._omid.mediaEvents) {
+      console.log('OMID > mediaEvent.skipped');
+      this._omid.mediaEvents.skipped();
+    }
+    // finish ad session
+    if(this._omid.adSession) {
+      console.log('OMID > adSession.finish');
+      this._omid.adSession.finish();
+    }
+  }
+
   this._callEvent(this.EVENTS.AdSkipped);
   // abort the ad, unsubscribe and reset to a default state
   this._abort();
 };
 AdsManager.prototype.onAdVolumeChange = function() {
+
+  // TODO: OMID handle media event volumeChange
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    const volume = this.getVolume();
+    console.log('OMID > mediaEvent.volumeChange', volume);
+    this._omid.mediaEvents.volumeChange(volume);
+  }
+
   this._callEvent(this.EVENTS.AdVolumeChange);
 };
 AdsManager.prototype.onAdImpression = function() {
@@ -432,6 +521,13 @@ AdsManager.prototype.onAdImpression = function() {
       this._hasImpression = true;
     }
   }
+
+  // TODO: OMID handle ad event impression
+  if(this._omid.isAdSessionStarted && this._omid.adEvents) {
+    console.log('OMID > adEvents.impressionOccurred');
+    this._omid.adEvents.impressionOccurred();
+  }
+
   this._callEvent(this.EVENTS.AdImpression);
 };
 AdsManager.prototype.onAdClickThru = function(url, id, playerHandles) {
@@ -446,36 +542,78 @@ AdsManager.prototype.onAdVideoFirstQuartile = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
+
+  // TODO: OMID handle media event firstQuartile
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.firstQuartile');
+    this._omid.mediaEvents.firstQuartile();
+  }
+
   this._callEvent(this.EVENTS.AdVideoFirstQuartile);
 };
 AdsManager.prototype.onAdVideoMidpoint = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
+
+  // TODO: OMID handle media event midpoint
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.midpoint');
+    this._omid.mediaEvents.midpoint();
+  }
+
   this._callEvent(this.EVENTS.AdVideoMidpoint);
 };
 AdsManager.prototype.onAdVideoThirdQuartile = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this.updateVPAIDProgress();
   }
+
+  // TODO: OMID handle media event thirdQuartile
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.thirdQuartile');
+    this._omid.mediaEvents.thirdQuartile();
+  }
+
   this._callEvent(this.EVENTS.AdVideoThirdQuartile);
 };
 AdsManager.prototype.onAdPaused = function() {
   if(this._vastTracker) {
     this._vastTracker.setPaused(true);
   }
+
+  // TODO: OMID handle media event pause
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.pause');
+    this._omid.mediaEvents.pause();
+  }
+
   this._callEvent(this.EVENTS.AdPaused);
 };
 AdsManager.prototype.onAdPlaying = function() {
   if(this._vastTracker) {
     this._vastTracker.setPaused(false);
   }
+
+  // TODO: OMID handle media event resume
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.resume');
+    this._omid.mediaEvents.resume();
+  }
+
   this._callEvent(this.EVENTS.AdPlaying);
 };
 AdsManager.prototype.onAdVideoComplete = function() {
   if(this._isVPAID && this._vpaidCreative && this._vastTracker) {
     this._vastTracker.complete();
   }
+
+  // TODO: OMID handle media event complete
+  if(this._omid.isAdSessionStarted && this._omid.mediaEvents) {
+    console.log('OMID > mediaEvent.complete');
+    this._omid.mediaEvents.complete();
+  }
+
   this._callEvent(this.EVENTS.AdVideoComplete);
 };
 AdsManager.prototype.onAllAdsCompleted = function() {
@@ -484,6 +622,12 @@ AdsManager.prototype.onAllAdsCompleted = function() {
 AdsManager.prototype.onAdError = function(message) {
 
   this._hasError = true;
+
+  // TODO: OMID finish ad session
+  if(this._omid.isAdSessionStarted && this._omid.adSession) {
+    this._omid.adSession.finish();
+  }
+
   /*
   // Stop and clear timeouts, intervals
   this.stopVASTMediaLoadTimeout();
@@ -954,12 +1098,85 @@ AdsManager.prototype._processAd = function(isNext = false) {
         this._vastTracker = new VASTTracker(null, this._ad, this._creative);
         this._vastTracker.load();
 
+        // TODO: OMID
+        if(this._options.omid &&
+          this._omid.sessionClient &&
+          this._omid.partner &&
+          this._ad.adVerifications.length &&
+          this._options.pageUrl) {
+
+          console.log('OMID > enabled and ad has adVerifications', this._ad, this._options);
+          const getVerificationVendorById = (verificationVendorId) => {
+            for(const [key, value] of Object.entries(this._omid.sessionClient.VerificationVendorId)) {
+              if(value === verificationVendorId) return key;
+            }
+          }
+          // Filter ad adVerifications by vendor and set access mode
+          this._omid.resources = this._ad.adVerifications.filter((verification) => {
+            const scriptUrl = verification.resource;
+            const verificationVendor = getVerificationVendorById(this._omid.sessionClient.verificationVendorIdForScriptUrl(scriptUrl));
+            const accessMode = this._options.omid[verificationVendor];
+            if(accessMode) {
+              console.log('OMID > vendor:', verificationVendor, 'access mode:', accessMode);
+              return verification.accessMode = accessMode.toLowerCase();
+            }
+          }).map((verification) => {
+            return new this._omid.sessionClient.VerificationScriptResource(verification.resource, verification.vendor,
+              verification.parameters, verification.accessMode);
+          });
+
+          console.log('OMID > resources', this._omid.resources);
+          if(this._omid.resources && this._omid.resources.length) {
+            // Create OMID context
+            console.log('OMID > create context', this._omid.partner, this._omid.resources, this._options.pageUrl);
+            this._omid.context = new this._omid.sessionClient.Context(this._omid.partner, this._omid.resources, this._options.pageUrl);
+            this._omid.context.setVideoElement(this._videoSlot);
+            this._omid.context.setServiceWindow(window.top);
+
+            // Create OMID ad session
+            this._omid.adSession = new this._omid.sessionClient.AdSession(this._omid.context);
+            this._omid.adSession.setCreativeType('video');
+            // See impression type documentation to determine which type you should use.
+            this._omid.adSession.setImpressionType('beginToRender');
+            // Check if OMID ad session is supported
+            if (!this._omid.adSession.isSupported()) {
+              console.log('OMID > session not supported');
+            } else {
+              console.log('OMID > session supported !!!', this._omid.adSession);
+              this._omid.adEvents = new this._omid.sessionClient.AdEvents(this._omid.adSession);
+              this._omid.mediaEvents = new this._omid.sessionClient.MediaEvents(this._omid.adSession);
+
+              // Start OMID ad session
+              console.log('OMID > adSession.start');
+              this._omid.adSession.start();
+
+              // OMID register session observer
+              this._omid.adSession.registerSessionObserver((event) => {
+                if (event.type === 'sessionStart') {
+                  console.log('OMID > ad sessionStart', event.type);
+                  this._omid.isAdSessionStarted = true;
+                } else if (event.type === 'sessionError') {
+                  // handle error
+                  console.log('OMID > ad sessionError');
+                  this._omid.isAdSessionStarted = false;
+                } else if (event.type === 'sessionFinish') {
+                  // clean up
+                  console.log('OMID > ad sessionFinish');
+                  this._omid.isAdSessionStarted = false;
+                }
+              });
+
+            }
+          }
+        }
+
         if(!isNext) {
           // If not VPAID dispatch AdsManagerLoaded event -> ad is ready for init
           this.onAdsManagerLoaded();
         } else {
           this.init(this._attributes.width, this._attributes.height, this._attributes.viewMode, isNext);
         }
+
       } else {
         // Linear assets were found in the VAST ad response, but none of them match the video player's capabilities.
         this.onAdError(this.ERRORS.VAST_LINEAR_ASSET_MISMATCH);

@@ -434,7 +434,18 @@
       videoElement.play();
     }
 
-    adsManager.requestAds(vastUrl, { muted: false });
+    adsManager.requestAds(vastUrl, {
+      muted: false,
+      // TODO:
+      pageUrl: location.href,
+      //omid: null,
+      omid: {
+        'INTEGRAL_AD_SCIENCE': 'FULL',
+        'DOUBLEVERIFY': 'FULL',
+        'GOOGLE': 'FULL',
+        'OTHER': 'DOMAIN'
+      },
+    });
   }
 
   testAdButton.addEventListener('click', function() {
